@@ -1,0 +1,191 @@
+.grp-minigame-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 5, 10, 0.85);
+  padding: 0.5rem;
+}
+
+.grp-minigame-panel {
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 0.9em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  font-size: 0.6rem;
+  line-height: 1.6;
+}
+
+.grp-minigame-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grp-minigame-header h2 {
+  font-size: 0.72rem;
+  margin: 0;
+}
+
+.grp-minigame-exit {
+  font-size: 0.6rem;
+  padding: 0.3em 0.55em;
+}
+
+.grp-minigame-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+
+.grp-minigame-actions {
+  display: flex;
+  gap: 0.5em;
+  flex-wrap: wrap;
+}
+
+.grp-memory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4em;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.grp-memory-card {
+  aspect-ratio: 1;
+  background: #2a2a40;
+  border: 2px solid #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.grp-memory-card:disabled {
+  cursor: default;
+}
+
+.grp-memory-card.grp-matched {
+  background: #244d33;
+  border-color: #4caf6d;
+}
+
+.grp-timing-bar-track {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  background: #14141f;
+  border: 2px solid #f4f4f4;
+  overflow: hidden;
+}
+
+.grp-timing-bar-target {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(76, 175, 109, 0.55);
+  border-left: 2px solid #4caf6d;
+  border-right: 2px solid #4caf6d;
+}
+
+.grp-timing-bar-marker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 3px;
+  background: #ffd54f;
+}
+
+.grp-hit-dots {
+  display: flex;
+  gap: 0.4em;
+}
+
+.grp-hit-dot {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #f4f4f4;
+  background: #14141f;
+}
+
+.grp-hit-dot.grp-hit {
+  background: #ff8a3d;
+}
+
+.grp-sequence-row {
+  display: flex;
+  gap: 0.5em;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.grp-sequence-btn {
+  padding: 0.7em;
+  background: #14141f;
+  border: 2px solid #f4f4f4;
+}
+
+.grp-sequence-btn.grp-active {
+  background: #276d85;
+  border-color: #4dd0e1;
+}
+
+.grp-node-grid {
+  display: flex;
+  gap: 0.6em;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.grp-node-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #14141f;
+  border: 3px solid #f4f4f4;
+  font-size: 0.7rem;
+  color: #fff;
+}
+
+.grp-node-btn.grp-node-lit {
+  background: #c98a1c;
+  border-color: #ffd54f;
+  box-shadow: 0 0 12px #ffd54f;
+}
+
+.grp-node-btn.grp-node-connected {
+  background: #6a4d0e;
+  border-color: #ffd54f;
+}
+
+.grp-minigame-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+  text-align: center;
+  animation: grp-success-pop 0.4s ease;
+}
+
+@keyframes grp-success-pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.grp-minigame-progress {
+  font-size: 0.55rem;
+  opacity: 0.85;
+}

@@ -1,0 +1,86 @@
+.grp-mobile-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0.6rem;
+  touch-action: none;
+}
+
+.grp-mobile-controls > * {
+  pointer-events: auto;
+}
+
+.grp-dpad {
+  position: relative;
+  width: 116px;
+  height: 116px;
+  touch-action: none;
+}
+
+.grp-dpad-btn {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  background: rgba(20, 20, 31, 0.85);
+  border: 2px solid #f4f4f4;
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+}
+
+.grp-dpad-up {
+  top: 0;
+  left: 39px;
+}
+.grp-dpad-down {
+  bottom: 0;
+  left: 39px;
+}
+.grp-dpad-left {
+  top: 39px;
+  left: 0;
+}
+.grp-dpad-right {
+  top: 39px;
+  right: 0;
+}
+
+.grp-action-cluster {
+  display: grid;
+  grid-template-columns: repeat(2, 44px);
+  grid-template-rows: repeat(2, 44px);
+  gap: 0.4rem;
+  align-items: end;
+}
+
+.grp-action-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(20, 20, 31, 0.85);
+  border: 2px solid #f4f4f4;
+  color: #fff;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+
+.grp-action-a {
+  background: rgba(76, 175, 109, 0.85);
+}
+
+@media (pointer: fine) and (hover: hover) {
+  .grp-mobile-controls {
+    display: none;
+  }
+}

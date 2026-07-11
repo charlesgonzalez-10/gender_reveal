@@ -1,0 +1,49 @@
+.grp-dialogue-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  padding: 0.6rem;
+  display: flex;
+  justify-content: center;
+}
+
+.grp-dialogue-box {
+  width: 100%;
+  max-width: 100%;
+  min-height: 4.5em;
+  padding: 0.85em 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  background: #14141f;
+}
+
+.grp-dialogue-speaker {
+  font-size: 0.55rem;
+  color: #ffd54f;
+}
+
+.grp-dialogue-text {
+  font-size: 0.62rem;
+  line-height: 1.7;
+  margin: 0;
+  min-height: 2.6em;
+}
+
+.grp-dialogue-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grp-dialogue-skip {
+  font-size: 0.5rem;
+  padding: 0.4em 0.7em;
+}
+
+.grp-dialogue-advance {
+  font-size: 0.55rem;
+  padding: 0.4em 0.8em;
+}

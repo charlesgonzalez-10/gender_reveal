@@ -1,0 +1,85 @@
+.grp-hud-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.grp-hud-layer > * {
+  pointer-events: auto;
+}
+
+.grp-clue-tracker {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 0.4em 0.55em;
+  font-size: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  background: rgba(20, 20, 31, 0.9);
+}
+
+.grp-clue-tracker-count {
+  white-space: nowrap;
+}
+
+.grp-clue-tracker-icons {
+  display: flex;
+  gap: 0.25em;
+}
+
+.grp-clue-slot {
+  display: flex;
+}
+
+.grp-clue-slot-pop {
+  animation: grp-clue-pop 0.5s ease;
+}
+
+@keyframes grp-clue-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.6);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.grp-top-bar {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: flex;
+  gap: 4px;
+}
+
+.grp-icon-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 20, 31, 0.9);
+  color: #fff;
+  border: 2px solid #f4f4f4;
+  font-size: 0.6rem;
+  padding: 0;
+}
+
+.grp-final-gate-banner {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 31, 0.92);
+  border: 2px solid #ffd54f;
+  color: #ffd54f;
+  font-size: 0.5rem;
+  padding: 0.4em 0.7em;
+  text-align: center;
+}

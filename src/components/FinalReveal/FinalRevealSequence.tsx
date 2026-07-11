@@ -1,0 +1,171 @@
+import { useEffect, useMemo, useState } from "react";
+import type { RevealWord } from "../../providers/revealMapping";
+import { eventConfig } from "../../config/eventConfig";
+import { soundManager } from "../../state/audio";
+import ClueIcon from "../ClueIcon";
+import PokemonIcon from "../PokemonIcon";
+import "../../styles/finalReveal.css";
+
+type Stage = "clues" | "countdown" | "shaking" | "flash" | "result";
+
+interface FinalRevealSequenceProps {
+  resultWord: RevealWord;
+  isPreview?: boolean;
+  reducedMotion?: boolean;
+  onReplayReveal?: () => void;
+  onReplayAdventure?: () => void;
+  onReturnToTitle?: () => void;
+  onExitPreview?: () => void;
+}
+
+const CLUE_ORDER = ["leaf", "flame", "water", "lightning"] as const;
+const POKEMON_ORDER = ["bulbasaur", "charmander", "squirtle", "pikachu"] as const;
+
+export default function FinalRevealSequence({
+  resultWord,
+  isPreview = false,
+  reducedMotion = false,
+  onReplayReveal,
+  onReplayAdventure,
+  onReturnToTitle,
+  onExitPreview,
+}: FinalRevealSequenceProps) {
+  const [stage, setStage] = useState<Stage>("clues");
+  const [count, setCount] = useState(3);
+  const [replayKey, setReplayKey] = useState(0);
+  const speed = reducedMotion ? 0.25 : 1;
+
+  useEffect(() => {
+    setStage("clues");
+    setCount(3);
+  }, [replayKey]);
+
+  useEffect(() => {
+    if (stage !== "clues") return;
+    const t = setTimeout(() => setStage("countdown"), 1200 * speed);
+    return () => clearTimeout(t);
+  }, [stage, speed]);
+
+  useEffect(() => {
+    if (stage !== "countdown") return;
+    if (count <= 0) {
+      setStage("shaking");
+      return;
+    }
+    soundManager.playSfx("countdown");
+    const t = setTimeout(() => setCount((c) => c - 1), 850 * speed);
+    return () => clearTimeout(t);
+  }, [stage, count, speed]);
+
+  useEffect(() => {
+    if (stage !== "shaking") return;
+    const t = setTimeout(() => setStage("flash"), 1300 * speed);
+    return () => clearTimeout(t);
+  }, [stage, speed]);
+
+  useEffect(() => {
+    if (stage !== "flash") return;
+    const t = setTimeout(() => {
+      soundManager.playSfx("celebration");
+      setStage("result");
+    }, 480 * speed);
+    return () => clearTimeout(t);
+  }, [stage, speed]);
+
+  const confettiPieces = useMemo(() => {
+    if (stage !== "result") return [];
+    const palette = resultWord === "boy" ? ["#6fb3ff", "#bfe0ff", "#3f7fce", "#e8f4ff"] : ["#ff9fd0", "#ffd6ec", "#d9508f", "#fff0f8"];
+    return Array.from({ length: reducedMotion ? 16 : 56 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.7,
+      duration: 2.2 + Math.random() * 1.6,
+      color: palette[i % palette.length],
+    }));
+  }, [stage, resultWord, reducedMotion]);
+
+  const isBoy = resultWord === "boy";
+  const themeClass = isBoy ? "grp-reveal-theme-a" : "grp-reveal-theme-b";
+  const headline = isBoy ? "IT'S A BOY!" : "IT'S A GIRL!";
+
+  return (
+    <div className={`grp-reveal-overlay ${stage === "result" ? themeClass : ""}`} role="dialog" aria-label="Final reveal">
+      {isPreview && <div className="grp-preview-banner">PREVIEW MODE — not the real result</div>}
+
+      {stage === "clues" && (
+        <>
+          <p className="grp-visually-hidden">All four clues combine into the mystery object.</p>
+          <div className="grp-reveal-clue-row">
+            {CLUE_ORDER.map((c) => (
+              <ClueIcon key={c} id={c} size={40} collected />
+            ))}
+          </div>
+          <p>The clues are combining...</p>
+        </>
+      )}
+
+      {stage === "countdown" && <div className="grp-reveal-countdown" aria-live="assertive">{count > 0 ? count : "..."}</div>}
+
+      {stage === "shaking" && (
+        <div className="grp-reveal-orb-wrap">
+          <div className={`grp-reveal-orb ${reducedMotion ? "" : "grp-shake"}`} aria-label="Mystery object" />
+        </div>
+      )}
+
+      {stage === "flash" && <div className="grp-reveal-flash" />}
+
+      {stage === "result" && (
+        <>
+          {!reducedMotion &&
+            confettiPieces.map((p) => (
+              <div
+                key={p.id}
+                className="grp-confetti-piece"
+                style={{
+                  left: `${p.left}%`,
+                  background: p.color,
+                  animationDelay: `${p.delay}s`,
+                  animationDuration: `${p.duration}s`,
+                }}
+              />
+            ))}
+          <div className="grp-reveal-result">
+            <h1 className="grp-reveal-headline">{headline}</h1>
+            <p className="grp-reveal-subtitle">{eventConfig.revealSubtitle}</p>
+            <div className="grp-reveal-pokemon-row">
+              {POKEMON_ORDER.map((p) => (
+                <PokemonIcon key={p} id={p} size={48} animated />
+              ))}
+            </div>
+            <div className="grp-reveal-actions">
+              <button
+                type="button"
+                className="grp-btn"
+                onClick={() => {
+                  setReplayKey((k) => k + 1);
+                  onReplayReveal?.();
+                }}
+              >
+                Replay Reveal
+              </button>
+              {isPreview ? (
+                <button type="button" className="grp-btn grp-btn--primary" onClick={onExitPreview}>
+                  Return to Setup
+                </button>
+              ) : (
+                <>
+                  <button type="button" className="grp-btn" onClick={onReplayAdventure}>
+                    Replay Adventure
+                  </button>
+                  <button type="button" className="grp-btn grp-btn--primary" onClick={onReturnToTitle}>
+                    Return to Title
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

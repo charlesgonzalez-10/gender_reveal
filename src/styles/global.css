@@ -1,0 +1,132 @@
+@import "@fontsource/press-start-2p";
+
+:root {
+  color-scheme: dark;
+  --grp-bg: #0b0b12;
+  --grp-panel: #1c1c2b;
+  --grp-panel-border: #f4f4f4;
+  --grp-text: #f4f4f4;
+  --grp-accent-green: #4caf6d;
+  --grp-accent-orange: #ff8a3d;
+  --grp-accent-aqua: #4dd0e1;
+  --grp-accent-yellow: #ffd54f;
+  --grp-accent-gold: #e0b23f;
+  --grp-shadow: rgba(0, 0, 0, 0.6);
+  --grp-focus: #ffd54f;
+  --grp-font-pixel: "Press Start 2P", "Courier New", monospace;
+  --grp-font-body: "Press Start 2P", "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--grp-bg);
+  color: var(--grp-text);
+  font-family: var(--grp-font-body);
+  -webkit-font-smoothing: none;
+  overscroll-behavior: none;
+}
+
+img,
+canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--grp-focus);
+  outline-offset: 2px;
+}
+
+/* Reduced motion: respect both OS preference and in-game toggle */
+.grp-reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.grp-pixel-panel {
+  background: var(--grp-panel);
+  border: 4px solid var(--grp-panel-border);
+  box-shadow: 0 0 0 4px #000, 4px 4px 0 4px var(--grp-shadow);
+  image-rendering: pixelated;
+}
+
+.grp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.grp-btn {
+  background: var(--grp-panel);
+  color: var(--grp-text);
+  border: 3px solid var(--grp-panel-border);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  padding: 0.75em 1em;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  letter-spacing: 0.5px;
+  transition: transform 0.08s ease, background 0.08s ease;
+}
+
+.grp-btn:hover:not(:disabled) {
+  background: #2a2a40;
+  transform: translateY(-2px);
+}
+
+.grp-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.grp-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.grp-btn--primary {
+  background: var(--grp-accent-green);
+  color: #0b0b12;
+  border-color: #0b0b12;
+}
+
+.grp-btn--primary:hover:not(:disabled) {
+  background: #5fd486;
+}
+
+.grp-btn--danger {
+  background: #c94f4f;
+  color: #fff;
+  border-color: #0b0b12;
+}
