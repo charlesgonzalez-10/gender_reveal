@@ -278,50 +278,107 @@ const POKEMON_PALETTE: Record<PokemonId, { body: number; accent: number }> = {
   pikachu: { body: 0xf6d24c, accent: 0xc98a1c },
 };
 
+const POKEMON_CANVAS = { w: 42, h: 34 };
+
 export function generatePokemonTexture(scene: Phaser.Scene, id: PokemonId): void {
   const key = `pokemon-${id}`;
   if (scene.textures.exists(key)) return;
   const { body, accent } = POKEMON_PALETTE[id];
   const g = scene.add.graphics();
+  const cx = POKEMON_CANVAS.w / 2;
+  const dy = 8; // headroom for ears/bulb/flame accessories above the body
 
-  // feet stubs
+  // soft ground shadow
+  g.fillStyle(0x000000, 0.22);
+  g.fillEllipse(cx, 26 + dy - 6, 16, 4);
+
+  // stub feet, planted slightly wider than the body for a friendly stance
   g.fillStyle(accent, 1);
-  g.fillRoundedRect(3, 18, 4, 4, 2);
-  g.fillRoundedRect(15, 18, 4, 4, 2);
+  g.fillRoundedRect(cx - 9, 20 + dy - 6, 5, 5, 2);
+  g.fillRoundedRect(cx + 4, 20 + dy - 6, 5, 5, 2);
 
-  // main body with a soft highlight for a bit of dimensionality
+  // cream belly patch drawn first so the body silhouette overlaps its edges
+  g.fillStyle(0xfff2d6, 1);
+  g.fillEllipse(cx, 17 + dy - 6, 9, 6);
+
+  // rounded body silhouette
   g.fillStyle(body, 1);
-  g.fillRoundedRect(1, 6, 20, 14, 6);
-  g.fillStyle(0xffffff, 0.18);
-  g.fillRoundedRect(3, 7, 8, 5, 3);
+  g.fillRoundedRect(cx - 11, dy, 22, 16, 8);
 
-  // face
+  // soft top-left highlight for a little dimensionality
+  g.fillStyle(0xffffff, 0.22);
+  g.fillEllipse(cx - 5, dy + 5, 8, 5);
+
+  // big friendly eyes with a catch-light sparkle
   g.fillStyle(0x111111, 1);
-  g.fillCircle(8, 13, 1.6);
-  g.fillCircle(15, 13, 1.6);
+  g.fillCircle(cx - 5, dy + 9, 2.1);
+  g.fillCircle(cx + 5, dy + 9, 2.1);
+  g.fillStyle(0xffffff, 0.9);
+  g.fillCircle(cx - 5.6, dy + 8.3, 0.7);
+  g.fillCircle(cx + 4.4, dy + 8.3, 0.7);
+
+  // small blush marks (soft, not the bold circular cheek trademark look)
+  g.fillStyle(accent, 0.35);
+  g.fillEllipse(cx - 8, dy + 12, 2.6, 1.6);
+  g.fillEllipse(cx + 8, dy + 12, 2.6, 1.6);
+
   g.fillStyle(accent, 1);
-  g.fillRect(6, 18, 11, 2);
+  g.fillRoundedRect(cx - 4, dy + 13, 8, 2, 1);
 
   if (id === "bulbasaur") {
+    // a rounded bulb with a small leafy sprout, sitting on the back
     g.fillStyle(accent, 1);
-    g.fillEllipse(11, 3, 9, 6);
+    g.fillEllipse(cx, dy - 1, 11, 6);
     g.fillStyle(0x3f9c5f, 1);
-    g.fillEllipse(11, 2, 5, 3);
+    g.fillEllipse(cx - 2, dy - 4, 3, 3.5);
+    g.fillEllipse(cx + 2, dy - 4, 3, 3.5);
   } else if (id === "charmander") {
+    // a curved flame tail with a warm two-tone core
     g.fillStyle(0xffb84d, 1);
-    g.fillTriangle(18, 2, 22, 8, 16, 8);
-    g.fillStyle(0xffe08a, 0.8);
-    g.fillTriangle(19, 3, 21, 7, 17, 7);
+    g.beginPath();
+    g.moveTo(cx + 10, dy + 10);
+    g.lineTo(cx + 18, dy + 4);
+    g.lineTo(cx + 15, dy - 2);
+    g.lineTo(cx + 20, dy + 2);
+    g.lineTo(cx + 14, dy + 12);
+    g.closePath();
+    g.fillPath();
+    g.fillStyle(0xffe08a, 0.85);
+    g.fillEllipse(cx + 16, dy + 3, 3.5, 4.5);
+    // two small head bumps
+    g.fillStyle(body, 1);
+    g.fillCircle(cx - 6, dy, 2.4);
+    g.fillCircle(cx + 6, dy, 2.4);
   } else if (id === "squirtle") {
-    g.lineStyle(2, accent, 1);
-    g.strokeEllipse(11, 4, 12, 5);
-  } else if (id === "pikachu") {
+    // a domed shell on the back with soft panel lines
     g.fillStyle(accent, 1);
-    g.fillTriangle(3, 6, 0, -2, 8, 4);
-    g.fillTriangle(19, 6, 22, -2, 14, 4);
+    g.fillEllipse(cx, dy - 1, 13, 5.5);
+    g.lineStyle(1, 0x1a4a58, 0.6);
+    g.beginPath();
+    g.moveTo(cx - 4, dy - 3);
+    g.lineTo(cx - 4, dy + 1);
+    g.moveTo(cx + 4, dy - 3);
+    g.lineTo(cx + 4, dy + 1);
+    g.strokePath();
+  } else if (id === "pikachu") {
+    // short, rounded ears (deliberately not the long pointed silhouette)
+    // with dark tips, and a small curved tail — original proportions
+    g.fillStyle(body, 1);
+    g.fillRoundedRect(cx - 9, dy - 7, 5, 9, 2.5);
+    g.fillRoundedRect(cx + 4, dy - 7, 5, 9, 2.5);
+    g.fillStyle(accent, 1);
+    g.fillRoundedRect(cx - 9, dy - 7, 5, 3, 2);
+    g.fillRoundedRect(cx + 4, dy - 7, 5, 3, 2);
+    g.fillStyle(body, 1);
+    g.beginPath();
+    g.moveTo(cx + 11, dy + 8);
+    g.lineTo(cx + 17, dy + 4);
+    g.lineTo(cx + 15, dy + 12);
+    g.closePath();
+    g.fillPath();
   }
 
-  g.generateTexture(key, 22, 22);
+  g.generateTexture(key, POKEMON_CANVAS.w, POKEMON_CANVAS.h);
   g.destroy();
 }
 
