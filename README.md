@@ -240,21 +240,64 @@ them gender-neutral).
 ## Replacing placeholder graphics
 
 Every sprite and tile is generated at runtime with Phaser's `Graphics` API
-in `src/game/systems/textures.ts` — there are no image files to swap. To
-use real artwork instead:
+in `src/game/systems/textures.ts` — there are no image files to swap today,
+by design (see [Copyright & assets](#copyright--assets)). The game code
+never cares *how* a texture was made — `TownScene` and `Player` only ever
+reference textures by string key — so dropping in your own artwork (fan
+art you've licensed, commissioned art, or art you've drawn yourself) is a
+localized change in exactly one file.
 
-1. Add your spritesheet/tile images under `src/assets/` (or `public/`).
-2. In `PreloadScene` (`src/game/scenes/PreloadScene.ts`), load them with
-   `this.load.image(...)`/`this.load.spritesheet(...)` instead of calling
-   `generateAllTextures(this)`.
-3. Keep the same texture **keys** used elsewhere (e.g. `player-down-0`,
-   `tile-grass`, `pokemon-pikachu`) so the rest of the game code doesn't
-   need to change — `TownScene` and `Player` only reference textures by key.
+**Full list of texture keys the game expects:**
+
+| Category | Keys | Expected size |
+| --- | --- | --- |
+| Player | `player-down-0`, `player-down-1`, `player-up-0`, `player-up-1`, `player-left-0`, `player-left-1`, `player-right-0`, `player-right-1` (the `-0`/`-1` pair is the walk-cycle) | 16×20 px |
+| Professor | `professor` | 17×20 px |
+| NPCs | `npc-townsfolk`, `npc-gardener` | 16×20 px |
+| Pokémon | `pokemon-bulbasaur`, `pokemon-charmander`, `pokemon-squirtle`, `pokemon-pikachu` | 22×22 px |
+| Tiles (16×16, tiled edge-to-edge) | `tile-grass`, `tile-path`, `tile-tallgrass`, `tile-water`, `tile-water2` (animation frame 2), `tile-sand`, `tile-tree`, `tile-rock`, `tile-flower`, `tile-fence`, `tile-building`, `tile-labfloor`, `tile-cavefloor`, `tile-sign`, `tile-gate`, `tile-finalfloor` | 16×16 px |
+
+**To swap in real art:**
+
+1. Add your image/spritesheet files under `src/assets/` (Vite will bundle
+   them — `import playerSheet from "../../assets/player.png"`).
+2. In `src/game/scenes/PreloadScene.ts`, replace the `generateAllTextures(this)`
+   call with `this.load.image(...)` calls in a `preload()` method — the
+   simplest path is to export each individual frame as its own PNG and
+   load it directly under the exact key the game expects, e.g.:
+
+   ```ts
+   // src/game/scenes/PreloadScene.ts
+   import playerDown0 from "../../assets/player-down-0.png";
+   import grassTile from "../../assets/tiles/grass.png";
+   // ...one import per file
+
+   preload() {
+     this.load.image("player-down-0", playerDown0);
+     this.load.image("tile-grass", grassTile);
+     // ...one load call per key in the table above
+   }
+
+   create() {
+     const initData = this.registry.get("initialProgress");
+     this.scene.start("Town", { progress: initData });
+   }
+   ```
+
+   (If you'd rather work from a single packed spritesheet, use
+   `this.load.spritesheet(sheetKey, path, { frameWidth, frameHeight })` and
+   then create an alias texture per frame with
+   `this.textures.get(sheetKey).get(frameIndex)` — but per-frame PNGs are
+   simpler to get right for a project this size.)
+3. Keep every key name identical to the table above; nothing else in the
+   codebase needs to change.
 
 The React-side icons (`src/components/PokemonIcon.tsx`,
 `src/components/ClueIcon.tsx`, mini-game symbols in
 `src/components/Minigames/GameSymbol.tsx`) are inline SVG — swap the SVG
-markup or replace them with `<img>` tags pointing at licensed artwork.
+markup or replace them with `<img>` tags pointing at your licensed artwork.
+The final-reveal mystery object and confetti (`src/components/FinalReveal/FinalRevealSequence.tsx`)
+are plain CSS — restyle freely.
 
 ## Replacing placeholder audio
 
