@@ -165,57 +165,105 @@ export function tileTextureKey(t: TileType, frame = 0): string {
 const PLAYER_COLORS = {
   jacket: 0x3f8f6f,
   jacketShade: 0x2c6d52,
+  jacketHighlight: 0x6fc19c,
   skin: 0xf0c090,
+  skinShade: 0xdba873,
   cap: 0x2f5f8f,
   capBrim: 0x1f4569,
+  capHighlight: 0x5686bf,
+  hair: 0x3a2a1a,
   pants: 0x2c2c3a,
   shoes: 0x4a3423,
 };
 
-function drawPlayerFrame(g: Phaser.GameObjects.Graphics, dir: "down" | "up" | "left" | "right", step: 0 | 1) {
-  g.clear();
-  const strideLeft = step === 1 ? 1 : -1;
+const HUMAN_CANVAS = { w: 20, h: 26 };
 
-  // legs (simple alternating stride)
-  g.fillStyle(PLAYER_COLORS.pants, 1);
-  g.fillRect(4, 15, 3, 4 - strideLeft);
-  g.fillRect(9, 15, 3, 4 + strideLeft);
-  g.fillStyle(PLAYER_COLORS.shoes, 1);
-  g.fillRect(4, 18 - strideLeft, 3, 2);
-  g.fillRect(9, 18 + strideLeft, 3, 2);
+/** Shared "chibi" body plan used by the player, professor, and NPCs — a
+ * rounded head, soft-shaded torso with stub arms, and a two-frame walk
+ * cycle — so every character in town reads as part of the same original
+ * cast rather than a mix of plain rectangles. */
+function drawHumanBase(
+  g: Phaser.GameObjects.Graphics,
+  step: 0 | 1,
+  colors: { top: number; topShade: number; topHighlight: number; skin: number; pants: number; shoes: number },
+) {
+  const cx = HUMAN_CANVAS.w / 2;
+  const stride = step === 1 ? 1 : -1;
 
-  // torso with a small shaded panel for depth
-  g.fillStyle(PLAYER_COLORS.jacket, 1);
-  g.fillRect(3, 7, 10, 9);
-  g.fillStyle(PLAYER_COLORS.jacketShade, 1);
-  g.fillRect(3, 12, 10, 4);
+  g.fillStyle(0x000000, 0.2);
+  g.fillEllipse(cx, 24, 11, 3);
 
-  // head
-  g.fillStyle(PLAYER_COLORS.skin, 1);
-  g.fillRect(4, 2, 8, 6);
+  g.fillStyle(colors.pants, 1);
+  g.fillRoundedRect(cx - 5, 17, 4, 6 - stride, 1.5);
+  g.fillRoundedRect(cx + 1, 17, 4, 6 + stride, 1.5);
+  g.fillStyle(colors.shoes, 1);
+  g.fillRoundedRect(cx - 5, 20 - stride, 4, 3, 1.5);
+  g.fillRoundedRect(cx + 1, 20 + stride, 4, 3, 1.5);
 
-  // cap (original two-tone design, deliberately not red/white to avoid
-  // resembling any copyrighted trainer character)
-  g.fillStyle(PLAYER_COLORS.cap, 1);
-  g.fillRect(3, 0, 10, 3);
-  g.fillStyle(PLAYER_COLORS.capBrim, 1);
-  if (dir === "down") g.fillRect(3, 3, 10, 1);
-  else if (dir === "up") g.fillRect(3, 0, 10, 1);
-  else if (dir === "left") g.fillRect(2, 3, 5, 1);
-  else g.fillRect(9, 3, 5, 1);
+  // stub arms peeking out from behind the torso
+  g.fillStyle(colors.topShade, 1);
+  g.fillRoundedRect(cx - 8, 10, 3, 7, 1.5);
+  g.fillRoundedRect(cx + 5, 10, 3, 7, 1.5);
 
+  // torso with a highlight and a shaded hem for a little dimensionality
+  g.fillStyle(colors.top, 1);
+  g.fillRoundedRect(cx - 6, 8, 12, 10, 4);
+  g.fillStyle(colors.topHighlight, 1);
+  g.fillRoundedRect(cx - 4, 9, 5, 3, 2);
+  g.fillStyle(colors.topShade, 1);
+  g.fillRoundedRect(cx - 6, 14, 12, 4, 3);
+
+  // rounded head
+  g.fillStyle(colors.skin, 1);
+  g.fillCircle(cx, 6, 5.5);
+  g.fillStyle(0xffffff, 0.2);
+  g.fillEllipse(cx - 2, 4, 3.5, 2.5);
+
+  return cx;
+}
+
+function drawFace(g: Phaser.GameObjects.Graphics, cx: number, dir: "down" | "up" | "left" | "right") {
+  if (dir === "up") return;
   g.fillStyle(0x111111, 1);
   if (dir === "down") {
-    g.fillRect(5, 5, 2, 2);
-    g.fillRect(9, 5, 2, 2);
-  } else if (dir === "up") {
-    g.fillStyle(PLAYER_COLORS.cap, 1);
-    g.fillRect(3, 2, 10, 5);
+    g.fillCircle(cx - 2, 6, 1);
+    g.fillCircle(cx + 2, 6, 1);
+    g.fillStyle(0xc96a5a, 0.35);
+    g.fillEllipse(cx - 3.5, 8, 1.6, 1);
+    g.fillEllipse(cx + 3.5, 8, 1.6, 1);
   } else if (dir === "left") {
-    g.fillRect(5, 5, 2, 2);
+    g.fillCircle(cx - 2, 6, 1);
   } else {
-    g.fillRect(9, 5, 2, 2);
+    g.fillCircle(cx + 2, 6, 1);
   }
+}
+
+function drawCap(g: Phaser.GameObjects.Graphics, cx: number, dir: "down" | "up" | "left" | "right") {
+  g.fillStyle(PLAYER_COLORS.hair, 1);
+  g.fillRoundedRect(cx - 5.5, 2, 11, 5, 3);
+  g.fillStyle(PLAYER_COLORS.cap, 1);
+  g.fillRoundedRect(cx - 6, 0, 12, 5, 3);
+  g.fillStyle(PLAYER_COLORS.capHighlight, 1);
+  g.fillRoundedRect(cx - 4.5, 0.5, 4, 2, 1.5);
+  g.fillStyle(PLAYER_COLORS.capBrim, 1);
+  if (dir === "down") g.fillRoundedRect(cx - 6, 3.5, 12, 1.5, 1);
+  else if (dir === "up") g.fillRoundedRect(cx - 6, 0, 12, 1.5, 1);
+  else if (dir === "left") g.fillRoundedRect(cx - 7, 3.5, 6, 1.5, 1);
+  else g.fillRoundedRect(cx + 1, 3.5, 6, 1.5, 1);
+}
+
+function drawPlayerFrame(g: Phaser.GameObjects.Graphics, dir: "down" | "up" | "left" | "right", step: 0 | 1) {
+  g.clear();
+  const cx = drawHumanBase(g, step, {
+    top: PLAYER_COLORS.jacket,
+    topShade: PLAYER_COLORS.jacketShade,
+    topHighlight: PLAYER_COLORS.jacketHighlight,
+    skin: PLAYER_COLORS.skin,
+    pants: PLAYER_COLORS.pants,
+    shoes: PLAYER_COLORS.shoes,
+  });
+  drawFace(g, cx, dir);
+  drawCap(g, cx, dir);
 }
 
 export function generatePlayerTextures(scene: Phaser.Scene): void {
@@ -226,7 +274,7 @@ export function generatePlayerTextures(scene: Phaser.Scene): void {
       if (scene.textures.exists(key)) continue;
       const g = scene.add.graphics();
       drawPlayerFrame(g, dir, step);
-      g.generateTexture(key, 16, 20);
+      g.generateTexture(key, HUMAN_CANVAS.w, HUMAN_CANVAS.h);
       g.destroy();
     }
   }
@@ -236,38 +284,52 @@ export function generateProfessorTexture(scene: Phaser.Scene): void {
   const key = "professor";
   if (scene.textures.exists(key)) return;
   const g = scene.add.graphics();
-  g.fillStyle(0xf4f4f4, 1);
-  g.fillRect(3, 7, 11, 11);
-  g.fillStyle(0xf0c090, 1);
-  g.fillRect(4, 1, 8, 7);
-  g.fillStyle(0xd8d8d8, 1);
-  g.fillRect(3, 0, 10, 3);
-  g.fillStyle(0x111111, 1);
-  g.fillRect(5, 4, 2, 2);
-  g.fillRect(9, 4, 2, 2);
-  g.fillStyle(0x2c2c3a, 1);
-  g.fillRect(3, 15, 4, 5);
-  g.fillRect(10, 15, 4, 5);
-  g.generateTexture(key, 17, 20);
+  const cx = drawHumanBase(g, 0, {
+    top: 0xf4f4f4,
+    topShade: 0xd6d6de,
+    topHighlight: 0xffffff,
+    skin: 0xf0c090,
+    pants: 0x555a66,
+    shoes: 0x3a3a3a,
+  });
+  // simple grey side-swept hair instead of a cap
+  g.fillStyle(0xc9c9d2, 1);
+  g.fillRoundedRect(cx - 6, 1, 12, 4.5, 3);
+  g.fillStyle(0xdfdfe6, 1);
+  g.fillRoundedRect(cx - 5, 1.5, 4, 2, 1.5);
+  drawFace(g, cx, "down");
+  // small round glasses for an approachable "professor" read
+  g.lineStyle(1, 0x2c2c3a, 0.85);
+  g.strokeCircle(cx - 2, 6, 1.8);
+  g.strokeCircle(cx + 2, 6, 1.8);
+  g.lineBetween(cx - 0.2, 6, cx + 0.2, 6);
+  g.generateTexture(key, HUMAN_CANVAS.w, HUMAN_CANVAS.h);
   g.destroy();
 }
 
 export function generateNpcTexture(scene: Phaser.Scene, key: string, shirtColor: number): void {
   if (scene.textures.exists(key)) return;
   const g = scene.add.graphics();
-  g.fillStyle(shirtColor, 1);
-  g.fillRect(3, 7, 10, 9);
-  g.fillStyle(0xf0c090, 1);
-  g.fillRect(4, 1, 8, 7);
+  const shade = Phaser.Display.Color.ValueToColor(shirtColor).darken(20).color;
+  const highlight = Phaser.Display.Color.ValueToColor(shirtColor).brighten(20).color;
+  const cx = drawHumanBase(g, 0, {
+    top: shirtColor,
+    topShade: shade,
+    topHighlight: highlight,
+    skin: 0xf0c090,
+    pants: 0x2c2c3a,
+    shoes: 0x4a3423,
+  });
   g.fillStyle(0x5a3a20, 1);
-  g.fillRect(3, 0, 10, 3);
-  g.fillStyle(0x111111, 1);
-  g.fillRect(5, 4, 2, 2);
-  g.fillRect(9, 4, 2, 2);
-  g.fillStyle(0x2c2c3a, 1);
-  g.fillRect(4, 15, 3, 5);
-  g.fillRect(9, 15, 3, 5);
-  g.generateTexture(key, 16, 20);
+  g.fillRoundedRect(cx - 5.5, 1.5, 11, 4.5, 3);
+  drawFace(g, cx, "down");
+  if (key === "npc-gardener") {
+    // a small sun hat instead of hair, to fit the garden setting
+    g.fillStyle(0xe6c778, 1);
+    g.fillEllipse(cx, 2.5, 15, 3.5);
+    g.fillRoundedRect(cx - 5, 0, 10, 4, 3);
+  }
+  g.generateTexture(key, HUMAN_CANVAS.w, HUMAN_CANVAS.h);
   g.destroy();
 }
 
