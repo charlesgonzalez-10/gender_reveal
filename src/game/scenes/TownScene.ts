@@ -48,7 +48,7 @@ const PROFESSOR_REMINDER = ["Find Bulbasaur, Charmander, Squirtle, and Pikachu!"
 
 const PROFESSOR_ALL_CLUES_FOUND = [
   "You found all four clues! Incredible work, trainer!",
-  "The sealed path has opened. Head to the gate to reveal the secret!",
+  "The glowing gate by the rocky cave has opened. Head there to reveal the secret!",
 ];
 
 const NPC_LINES: Record<string, string[]> = {
@@ -94,7 +94,7 @@ export class TownScene extends Phaser.Scene {
     this.liveGrid = townTileGrid.map((row) => [...row]);
     if (this.finalUnlocked) {
       this.forEachGateTile((col, row) => {
-        this.liveGrid[row][col] = "finalfloor";
+        this.liveGrid[row][col] = "gateopen";
       });
     }
   }
@@ -252,8 +252,8 @@ export class TownScene extends Phaser.Scene {
   private unlockFinalArea() {
     this.finalUnlocked = true;
     this.forEachGateTile((col, row) => {
-      this.liveGrid[row][col] = "finalfloor";
-      this.tileSprites[row][col].setTexture(tileTextureKey("finalfloor"));
+      this.liveGrid[row][col] = "gateopen";
+      this.tileSprites[row][col].setTexture(tileTextureKey("gateopen"));
     });
     gameEvents.emit(GameEvent.FinalAreaUnlocked);
   }

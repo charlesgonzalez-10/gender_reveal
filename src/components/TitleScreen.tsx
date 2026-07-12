@@ -48,10 +48,6 @@ export default function TitleScreen({
               {hasSavedProgress ? "New Game" : "Start Adventure"}
             </button>
           </div>
-          <p className="grp-title-instructions">
-            Use Arrow Keys / WASD to move · Enter, Space, or E to interact · Touch controls appear automatically on
-            mobile
-          </p>
         </div>
       )}
 

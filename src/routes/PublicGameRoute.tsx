@@ -110,7 +110,7 @@ export default function PublicGameRoute() {
       setActiveDialogue(payload);
     }
     function onFinalUnlocked() {
-      showNotice("The path ahead has opened!");
+      showNotice("The glowing gate by the rocky cave has opened!");
     }
     function onEnterGate() {
       setGateScreenOpen(true);
@@ -298,24 +298,20 @@ export default function PublicGameRoute() {
           <div className="grp-console-header">
             <span className="grp-console-comm">△ COMM.</span>
           </div>
-          <div className="grp-console-body">
-            <div className="grp-console-power">
-              <span className="grp-console-power-dot" aria-hidden="true" />
-              <span className="grp-console-power-waves" aria-hidden="true">
-                )))
-              </span>
+          <div className="grp-viewport-frame">
+            <span className="grp-console-power" aria-hidden="true">
+              <span className="grp-console-power-dot" />
+              <span className="grp-console-power-waves">)))</span>
               <span className="grp-console-power-label">POWER</span>
-            </div>
-            <div className="grp-viewport-frame">
-              <span className="grp-console-screw grp-console-screw--tr" aria-hidden="true" />
-              <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
-              <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
-              <div className="grp-viewport">
-                <div className="grp-not-ready-screen">
-                  <p className="grp-not-ready-message">
-                    The adventure is not ready yet. Please ask the event organizer for help.
-                  </p>
-                </div>
+            </span>
+            <span className="grp-console-screw grp-console-screw--tr" aria-hidden="true" />
+            <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
+            <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
+            <div className="grp-viewport">
+              <div className="grp-not-ready-screen">
+                <p className="grp-not-ready-message">
+                  The adventure is not ready yet. Please ask the event organizer for help.
+                </p>
               </div>
             </div>
           </div>
@@ -336,19 +332,16 @@ export default function PublicGameRoute() {
         <div className="grp-console-header">
           <span className="grp-console-comm">△ COMM.</span>
         </div>
-        <div className="grp-console-body">
-          <div className="grp-console-power">
-            <span className="grp-console-power-dot" aria-hidden="true" />
-            <span className="grp-console-power-waves" aria-hidden="true">
-              )))
-            </span>
+        <div className="grp-viewport-frame">
+          <span className="grp-console-power" aria-hidden="true">
+            <span className="grp-console-power-dot" />
+            <span className="grp-console-power-waves">)))</span>
             <span className="grp-console-power-label">POWER</span>
-          </div>
-          <div className="grp-viewport-frame">
-            <span className="grp-console-screw grp-console-screw--tr" aria-hidden="true" />
-            <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
-            <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
-            <div className="grp-viewport">
+          </span>
+          <span className="grp-console-screw grp-console-screw--tr" aria-hidden="true" />
+          <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
+          <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
+          <div className="grp-viewport">
             {screen === "title" && (
               <TitleScreen
                 hasSavedProgress={hasSavedProgress()}
@@ -451,7 +444,6 @@ export default function PublicGameRoute() {
                 {notice}
               </div>
             )}
-          </div>
           </div>
         </div>
         <div className="grp-console-wordmark">

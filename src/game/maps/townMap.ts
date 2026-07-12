@@ -17,6 +17,7 @@ export type TileType =
   | "cavefloor"
   | "sign"
   | "gate"
+  | "gateopen"
   | "finalfloor";
 
 const SOLID_TILES = new Set<TileType>(["tree", "rock", "fence", "building", "sign", "gate", "water"]);

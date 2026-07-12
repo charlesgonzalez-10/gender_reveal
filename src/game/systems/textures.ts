@@ -147,6 +147,17 @@ export function generateTileTextures(scene: Phaser.Scene): void {
     g.fillStyle(0xf4f4f4, 1);
     g.fillCircle(8, 8, 1.4);
   });
+  makeTileTexture(scene, tileKey("gateopen"), (g) => {
+    g.fillStyle(0x3f9a4a, 1);
+    g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+    g.fillStyle(0xffd54f, 0.35);
+    g.fillCircle(8, 8, 7);
+    g.fillStyle(0x4caf6d, 1);
+    g.fillRect(1, 2, 3, 12);
+    g.fillRect(12, 2, 3, 12);
+    g.fillStyle(0xffd54f, 1);
+    g.fillCircle(8, 8, 2.4);
+  });
   makeTileTexture(scene, tileKey("finalfloor"), (g) => {
     g.fillStyle(0x2c2a4a, 1);
     g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
