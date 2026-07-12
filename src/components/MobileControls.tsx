@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { gameEvents, GameEvent } from "../game/sceneEvents";
+import { soundManager } from "../state/audio";
 import "../styles/mobileControls.css";
 
 interface MobileControlsProps {
@@ -12,6 +13,15 @@ interface MobileControlsProps {
 
 type DirKey = "up" | "down" | "left" | "right";
 
+function pressFeedback() {
+  try {
+    navigator.vibrate?.(12);
+  } catch {
+    // Vibration API unsupported or blocked — press still registers visually.
+  }
+  soundManager.playSfx("click");
+}
+
 export default function MobileControls({ onAction, onBack, onMenu, onMute, muted }: MobileControlsProps) {
   const activeDirs = useRef<Record<DirKey, boolean>>({ up: false, down: false, left: false, right: false });
 
@@ -20,6 +30,7 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
   }, []);
 
   function setDir(dir: DirKey, active: boolean) {
+    if (active && !activeDirs.current[dir]) pressFeedback();
     activeDirs.current[dir] = active;
     emitMove();
   }
@@ -37,6 +48,13 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
       },
       onPointerLeave: () => setDir(dir, false),
       onPointerCancel: () => setDir(dir, false),
+    };
+  }
+
+  function withFeedback(fn: () => void) {
+    return () => {
+      pressFeedback();
+      fn();
     };
   }
 
@@ -60,13 +78,19 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
 
       <div className="grp-center-buttons" role="group" aria-label="System buttons">
         <span className="grp-pill-column">
-          <button type="button" className="grp-pill-btn" onClick={onMute} aria-pressed={muted} aria-label="Mute toggle" />
+          <button
+            type="button"
+            className="grp-pill-btn"
+            onClick={withFeedback(onMute)}
+            aria-pressed={muted}
+            aria-label="Mute toggle"
+          />
           <span className="grp-pill-label" aria-hidden="true">
             SELECT
           </span>
         </span>
         <span className="grp-pill-column">
-          <button type="button" className="grp-pill-btn" onClick={onMenu} aria-label="Menu" />
+          <button type="button" className="grp-pill-btn" onClick={withFeedback(onMenu)} aria-label="Menu" />
           <span className="grp-pill-label" aria-hidden="true">
             START
           </span>
@@ -74,10 +98,15 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
       </div>
 
       <div className="grp-action-cluster" role="group" aria-label="Action buttons">
-        <button type="button" className="grp-action-btn grp-action-b" onClick={onBack} aria-label="Back / Close">
+        <button type="button" className="grp-action-btn grp-action-b" onClick={withFeedback(onBack)} aria-label="Back / Close">
           B
         </button>
-        <button type="button" className="grp-action-btn grp-action-a" onClick={onAction} aria-label="Confirm / Interact">
+        <button
+          type="button"
+          className="grp-action-btn grp-action-a"
+          onClick={withFeedback(onAction)}
+          aria-label="Confirm / Interact"
+        >
           A
         </button>
       </div>

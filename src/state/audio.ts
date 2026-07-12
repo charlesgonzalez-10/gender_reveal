@@ -18,7 +18,8 @@ export type SfxName =
   | "countdown"
   | "celebration"
   | "error"
-  | "unlock";
+  | "unlock"
+  | "click";
 
 export type MusicTrack = "title" | "town" | "challenge" | "reveal" | "none";
 
@@ -86,6 +87,9 @@ class SoundManager {
       switch (name) {
         case "dialogue":
           this.blip(ctx, now, 880, 0.03);
+          break;
+        case "click":
+          this.blip(ctx, now, 300, 0.018, "square");
           break;
         case "confirm":
           this.tone(ctx, now, 660, 0.08, "square");

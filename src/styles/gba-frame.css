@@ -14,16 +14,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(6px, 1.4vh, 12px);
-  /* Width is normally capped by viewport width, but on short viewports
-     (small phones, or a phone's address/tab bars eating vertical space)
-     it also has to shrink so the whole shell — chrome above and below
-     the screen included — still fits without squeezing the screen
-     itself shorter than its content needs. ~230px approximates the
+  gap: clamp(8px, 1.6vh, 14px);
+  /* Width is normally capped by viewport width — phones are narrow, so
+     this is nearly always the binding constraint, which is what lets
+     the shell fill a large share of the screen. The height term is a
+     safety net for short viewports (small phones, or a phone's
+     address/tab bars eating vertical space): ~320px approximates the
      fixed header/wordmark/deck/padding height taken out of the budget. */
-  width: min(94vw, calc((92dvh - 230px) / 0.75 + 40px), 460px);
+  width: min(97vw, 480px, max(380px, calc((92dvh - 400px) / 0.75 + 50px)));
   max-width: 100%;
-  padding: 0.75rem;
+  padding: 0.6rem;
   box-sizing: border-box;
   touch-action: none;
 }
@@ -91,7 +91,7 @@
 .grp-console--framed .grp-viewport-frame {
   background: linear-gradient(165deg, #7a53c9 0%, #5b3ba3 45%, #432c7a 100%);
   border-radius: 18px;
-  padding: clamp(8px, 2vw, 16px);
+  padding: clamp(16px, 4.5vw, 28px);
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.22),
     inset 0 0 0 3px rgba(0, 0, 0, 0.25),
@@ -159,24 +159,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding-top: 2px;
+  gap: 5px;
+  padding: 6px 0 2px;
 }
 
 .grp-console-nintendo {
   font-family: "Georgia", "Times New Roman", serif;
   font-style: italic;
   font-weight: 700;
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   color: #1a1130;
   background: #f4f1ff;
-  padding: 2px 12px;
+  padding: 3px 14px;
   border-radius: 10px;
   letter-spacing: 0.5px;
 }
 
 .grp-console-gbc-logo {
-  font-size: clamp(0.6rem, 2.8vw, 0.85rem);
+  font-size: clamp(0.7rem, 3.4vw, 1rem);
   letter-spacing: 1px;
   color: #e8e0ff;
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);

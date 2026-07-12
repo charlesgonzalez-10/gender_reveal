@@ -1,10 +1,11 @@
 .grp-console-deck {
   width: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.25rem clamp(6px, 3vw, 20px) 0.4rem;
+  gap: clamp(2px, 1.2vw, 8px);
+  padding: 0.6rem clamp(4px, 2vw, 14px) 0.9rem;
   touch-action: none;
 }
 
@@ -13,12 +14,13 @@
 }
 
 /* Cross-shaped D-pad: 3x3 grid, corners left empty so the arms read as
-   a single plus rather than four separate squares. */
+   a single plus rather than four separate squares. Cells meet the
+   48-60px minimum comfortable touch target. */
 .grp-dpad-cross {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, clamp(26px, 8vw, 36px));
-  grid-template-rows: repeat(3, clamp(26px, 8vw, 36px));
+  grid-template-columns: repeat(3, clamp(48px, 12.5vw, 58px));
+  grid-template-rows: repeat(3, clamp(48px, 12.5vw, 58px));
   flex: 0 0 auto;
 }
 
@@ -26,32 +28,38 @@
   background: linear-gradient(180deg, #2c2c3a, #16161e);
   border: none;
   color: #ddd;
-  font-size: 0.9rem;
+  font-size: clamp(1.1rem, 3.2vw, 1.4rem);
   display: flex;
   align-items: center;
   justify-content: center;
   user-select: none;
+  transition: transform 0.06s ease, filter 0.06s ease;
+}
+
+.grp-dpad-btn:active {
+  transform: scale(0.88);
+  filter: brightness(1.35);
 }
 
 .grp-dpad-up {
   grid-column: 2;
   grid-row: 1;
-  border-radius: 5px 5px 0 0;
+  border-radius: 7px 7px 0 0;
 }
 .grp-dpad-down {
   grid-column: 2;
   grid-row: 3;
-  border-radius: 0 0 5px 5px;
+  border-radius: 0 0 7px 7px;
 }
 .grp-dpad-left {
   grid-column: 1;
   grid-row: 2;
-  border-radius: 5px 0 0 5px;
+  border-radius: 7px 0 0 7px;
 }
 .grp-dpad-right {
   grid-column: 3;
   grid-row: 2;
-  border-radius: 0 5px 5px 0;
+  border-radius: 0 7px 7px 0;
 }
 
 .grp-dpad-hub {
@@ -60,62 +68,88 @@
   background: linear-gradient(180deg, #2c2c3a, #16161e);
 }
 
-/* Select / Start pills, centered between the D-pad and action buttons */
+/* Select / Start pills, centered between the D-pad and action buttons.
+   The button itself is a generous invisible tap target; the visible
+   pill is drawn smaller via ::after to stay authentic-looking. */
 .grp-center-buttons {
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: 2px;
   align-self: flex-end;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .grp-pill-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 }
 
 .grp-pill-btn {
-  width: 30px;
-  height: 10px;
+  position: relative;
+  width: 48px;
+  height: 48px;
   padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.grp-pill-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 11px;
   border-radius: 6px;
   background: linear-gradient(180deg, #2c2c3a, #16161e);
-  border: none;
-  transform: rotate(-25deg);
+  transform: translate(-50%, -50%) rotate(-25deg);
+  transition: transform 0.06s ease, filter 0.06s ease;
+}
+
+.grp-pill-btn:active::after {
+  transform: translate(-50%, -50%) rotate(-25deg) scale(0.85);
+  filter: brightness(1.35);
 }
 
 .grp-pill-label {
-  font-size: 0.4rem;
+  font-size: 0.42rem;
   color: #d8c9f7;
   opacity: 0.75;
   letter-spacing: 0.5px;
 }
 
 /* Diagonal A / B cluster, matching the classic handheld layout: B low
-   and to the left, A high and to the right. */
+   and to the left, A high and to the right. Buttons meet the 48-60px
+   minimum comfortable touch target. */
 .grp-action-cluster {
   position: relative;
   flex: 0 0 auto;
-  width: clamp(70px, 20vw, 100px);
-  height: clamp(64px, 18vw, 92px);
+  width: clamp(76px, 20vw, 96px);
+  height: clamp(72px, 19vw, 90px);
 }
 
 .grp-action-btn {
   position: absolute;
-  width: clamp(32px, 9vw, 44px);
-  height: clamp(32px, 9vw, 44px);
+  width: clamp(48px, 13.5vw, 58px);
+  height: clamp(48px, 13.5vw, 58px);
   border-radius: 50%;
   background: linear-gradient(180deg, #3a2a5e, #1e1436);
   border: none;
   color: #e8e0ff;
-  font-size: 0.7rem;
+  font-size: clamp(0.85rem, 2.4vw, 1rem);
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.06s ease, filter 0.06s ease;
+}
+
+.grp-action-btn:active {
+  transform: scale(0.88);
+  filter: brightness(1.3);
 }
 
 .grp-action-a {
