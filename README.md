@@ -320,9 +320,13 @@ This is a static single-page app (no backend required).
 1. Import the repo in Vercel.
 2. Framework preset: Vite. Build command `npm run build`, output directory
    `dist`.
-3. Add an environment variable `VITE_ADMIN_PIN` in the Vercel project
+3. In Settings → Git, confirm **Production Branch** is `main`. Vercel seeds
+   this from the repository's default branch at import time, so if `main`
+   isn't the GitHub default branch, production deploys won't track pushes
+   to `main` until you set this explicitly.
+4. Add an environment variable `VITE_ADMIN_PIN` in the Vercel project
    settings (not just `.env.local`, which isn't deployed).
-4. Add a rewrite so client-side routing works for `/setup`:
+5. Add a rewrite so client-side routing works for `/setup`:
    `vercel.json`:
    ```json
    { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
