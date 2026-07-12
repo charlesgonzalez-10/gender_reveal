@@ -139,7 +139,7 @@ export const spawnPoints = {
   signClearing: toWorld(13, 16),
   bulbasaur: toWorld(25, 5),
   charmander: toWorld(27, 14),
-  squirtle: toWorld(6, 19),
+  squirtle: toWorld(6, 21),
   pikachu: toWorld(17, 19),
   finalGate: toWorld(26, 17),
   finalArea: toWorld(26, 20),
