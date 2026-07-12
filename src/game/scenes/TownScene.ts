@@ -46,6 +46,11 @@ const PROFESSOR_INTRO = [
 
 const PROFESSOR_REMINDER = ["Find Bulbasaur, Charmander, Squirtle, and Pikachu!", "Their challenges are scattered around town."];
 
+const PROFESSOR_ALL_CLUES_FOUND = [
+  "You found all four clues! Incredible work, trainer!",
+  "The sealed path has opened. Head to the gate to reveal the secret!",
+];
+
 const NPC_LINES: Record<string, string[]> = {
   npcTownsfolk: ["Today feels like the start of a great adventure!"],
   npcGardener: ["The four clues will lead you to a wonderful surprise."],
@@ -278,11 +283,13 @@ export class TownScene extends Phaser.Scene {
     }
 
     if (Phaser.Math.Distance.Between(px, py, spawnPoints.professor.x, spawnPoints.professor.y) <= RANGE) {
-      this.emitInteraction({
-        kind: "professor",
-        id: "professor",
-        lines: this.hasStartedIntro ? PROFESSOR_REMINDER : PROFESSOR_INTRO,
-      });
+      let lines = PROFESSOR_INTRO;
+      if (this.finalUnlocked) {
+        lines = PROFESSOR_ALL_CLUES_FOUND;
+      } else if (this.hasStartedIntro) {
+        lines = PROFESSOR_REMINDER;
+      }
+      this.emitInteraction({ kind: "professor", id: "professor", lines });
       return;
     }
 
