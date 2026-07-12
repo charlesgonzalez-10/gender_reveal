@@ -25,14 +25,14 @@ interface PokemonEntity {
 const POKEMON_GREETING: Record<PokemonId, string[]> = {
   bulbasaur: ["A wild Bulbasaur is resting in the garden.", "It seems to be guarding something... a memory challenge!"],
   charmander: ["Charmander flickers its tail flame at you.", "It wants to test your timing!"],
-  squirtle: ["Squirtle splashes playfully by the shore.", "It challenges you to repeat its water pattern!"],
+  squirtle: ["You cast a line into the pond and feel a tug!", "You reel in a Squirtle — it challenges you to repeat its water pattern!"],
   pikachu: ["Pikachu's cheeks spark with electricity!", "It wants to see your reflexes in a quick circuit challenge!"],
 };
 
 const POKEMON_DONE: Record<PokemonId, string[]> = {
   bulbasaur: ["Bulbasaur waves happily. You already have the Leaf Clue!"],
   charmander: ["Charmander's tail flame flickers warmly. You already have the Flame Clue!"],
-  squirtle: ["Squirtle blows a little bubble at you. You already have the Water Clue!"],
+  squirtle: ["You cast a line into the pond, but Squirtle just blows a bubble. You already have the Water Clue!"],
   pikachu: ["Pikachu gives a friendly spark-wave. You already have the Lightning Clue!"],
 };
 
@@ -149,6 +149,10 @@ export class TownScene extends Phaser.Scene {
     const ids: PokemonId[] = ["bulbasaur", "charmander", "squirtle", "pikachu"];
     for (const id of ids) {
       const pos = spawnPoints[id];
+      // Squirtle stays visible out in the pond; the actual interaction is
+      // triggered from the shoreline "fishing spot" since the pond tiles
+      // themselves are solid and unreachable.
+      const interactPos = id === "squirtle" ? spawnPoints.squirtleFishingSpot : pos;
       const sprite = this.add.image(pos.x, pos.y, `pokemon-${id}`).setDepth(5);
       const label = this.add
         .text(pos.x, pos.y - 18, id.charAt(0).toUpperCase() + id.slice(1), {
@@ -160,7 +164,7 @@ export class TownScene extends Phaser.Scene {
         })
         .setOrigin(0.5)
         .setDepth(6);
-      this.pokemonEntities.push({ id, sprite, label, x: pos.x, y: pos.y });
+      this.pokemonEntities.push({ id, sprite, label, x: interactPos.x, y: interactPos.y });
       if (this.completedChallenges.has(id)) {
         sprite.setAlpha(0.85);
       }
