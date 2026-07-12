@@ -1,17 +1,15 @@
-.grp-mobile-controls {
-  position: absolute;
-  inset: 0;
-  z-index: 45;
-  pointer-events: none;
+.grp-console-deck {
+  width: 100%;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  padding: 0.6rem;
+  gap: 0.5rem;
+  padding: 0.25rem clamp(6px, 3vw, 20px) 0.4rem;
   touch-action: none;
 }
 
-.grp-mobile-controls > * {
-  pointer-events: auto;
+.grp-console-deck > * {
+  touch-action: none;
 }
 
 /* Cross-shaped D-pad: 3x3 grid, corners left empty so the arms read as
@@ -19,104 +17,110 @@
 .grp-dpad-cross {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, 38px);
-  grid-template-rows: repeat(3, 38px);
-  touch-action: none;
+  grid-template-columns: repeat(3, clamp(26px, 8vw, 36px));
+  grid-template-rows: repeat(3, clamp(26px, 8vw, 36px));
+  flex: 0 0 auto;
 }
 
 .grp-dpad-btn {
-  background: rgba(20, 20, 31, 0.9);
-  border: 2px solid #f4f4f4;
-  color: #fff;
-  font-size: 1rem;
+  background: linear-gradient(180deg, #2c2c3a, #16161e);
+  border: none;
+  color: #ddd;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: none;
   user-select: none;
 }
 
 .grp-dpad-up {
   grid-column: 2;
   grid-row: 1;
-  border-radius: 6px 6px 0 0;
+  border-radius: 5px 5px 0 0;
 }
 .grp-dpad-down {
   grid-column: 2;
   grid-row: 3;
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 5px 5px;
 }
 .grp-dpad-left {
   grid-column: 1;
   grid-row: 2;
-  border-radius: 6px 0 0 6px;
+  border-radius: 5px 0 0 5px;
 }
 .grp-dpad-right {
   grid-column: 3;
   grid-row: 2;
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 5px 5px 0;
 }
 
 .grp-dpad-hub {
   grid-column: 2;
   grid-row: 2;
-  background: rgba(20, 20, 31, 0.9);
-  border-top: 2px solid #f4f4f4;
-  border-bottom: 2px solid #f4f4f4;
+  background: linear-gradient(180deg, #2c2c3a, #16161e);
 }
 
 /* Select / Start pills, centered between the D-pad and action buttons */
 .grp-center-buttons {
+  flex: 0 0 auto;
   display: flex;
-  gap: 0.5rem;
+  align-items: flex-end;
+  gap: 10px;
   align-self: flex-end;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.grp-pill-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
 }
 
 .grp-pill-btn {
-  min-width: 52px;
-  height: 20px;
-  padding: 0 10px;
-  border-radius: 10px;
-  background: rgba(20, 20, 31, 0.9);
-  border: 2px solid #f4f4f4;
-  color: #fff;
-  font-size: 0.45rem;
+  width: 30px;
+  height: 10px;
+  padding: 0;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #2c2c3a, #16161e);
+  border: none;
+  transform: rotate(-25deg);
+}
+
+.grp-pill-label {
+  font-size: 0.4rem;
+  color: #d8c9f7;
+  opacity: 0.75;
   letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: none;
 }
 
 /* Diagonal A / B cluster, matching the classic handheld layout: B low
    and to the left, A high and to the right. */
 .grp-action-cluster {
   position: relative;
-  width: 100px;
-  height: 92px;
-  touch-action: none;
+  flex: 0 0 auto;
+  width: clamp(70px, 20vw, 100px);
+  height: clamp(64px, 18vw, 92px);
 }
 
 .grp-action-btn {
   position: absolute;
-  width: 44px;
-  height: 44px;
+  width: clamp(32px, 9vw, 44px);
+  height: clamp(32px, 9vw, 44px);
   border-radius: 50%;
-  background: rgba(20, 20, 31, 0.85);
-  border: 2px solid #f4f4f4;
-  color: #fff;
+  background: linear-gradient(180deg, #3a2a5e, #1e1436);
+  border: none;
+  color: #e8e0ff;
   font-size: 0.7rem;
+  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: none;
 }
 
 .grp-action-a {
   top: 0;
   right: 0;
-  background: rgba(76, 175, 109, 0.85);
 }
 
 .grp-action-b {
@@ -124,8 +128,20 @@
   left: 0;
 }
 
-@media (pointer: fine) and (hover: hover) {
-  .grp-mobile-controls {
-    display: none;
-  }
+/* Speaker grille, bottom-right of the deck */
+.grp-speaker {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  grid-auto-rows: 4px;
+  gap: 3px;
+  align-self: flex-end;
+  margin-bottom: 4px;
+}
+
+.grp-speaker-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #1a1130;
 }

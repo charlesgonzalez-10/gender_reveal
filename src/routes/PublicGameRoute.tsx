@@ -32,11 +32,6 @@ const COMPLETION_LINES: Record<PokemonId, string> = {
   pikachu: "Pikachu gives you the Lightning Clue!",
 };
 
-function isTouchCapable(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
-}
-
 export default function PublicGameRoute() {
   const {
     progress,
@@ -60,7 +55,6 @@ export default function PublicGameRoute() {
   const [paused, setPaused] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [gameMountKey, setGameMountKey] = useState(0);
-  const isTouchDevice = useRef(isTouchCapable());
   const phaserGameRef = useRef<Phaser.Game | null>(null);
 
   function showNotice(msg: string) {
@@ -153,7 +147,10 @@ export default function PublicGameRoute() {
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
       if (e.key === "Escape") {
-        setPaused((p) => !p);
+        setPaused((p) => {
+          gameEvents.emit(p ? GameEvent.UnlockMovement : GameEvent.LockMovement);
+          return !p;
+        });
       } else if (e.key === "m" || e.key === "M") {
         setSoundEnabled(!progress.soundEnabled);
       } else if (e.key === "f" || e.key === "F") {
@@ -258,10 +255,18 @@ export default function PublicGameRoute() {
     setGameMountKey((k) => k + 1);
   }
 
-  const showTouchControls = isTouchDevice.current && screen === "game" && !finalRevealActive;
-  const anyOverlayOpen = Boolean(activeDialogue || activeMinigame || gateScreenOpen || paused);
+  function handleOpenPause() {
+    gameEvents.emit(GameEvent.LockMovement);
+    setPaused(true);
+  }
+
+  function handleClosePause() {
+    gameEvents.emit(GameEvent.UnlockMovement);
+    setPaused(false);
+  }
 
   function handleMobileAction() {
+    if (screen !== "game") return;
     if (activeDialogue) {
       handleDialogueClose();
     } else {
@@ -270,11 +275,12 @@ export default function PublicGameRoute() {
   }
 
   function handleMobileBack() {
-    if (paused) setPaused(false);
+    if (screen !== "game") return;
+    if (paused) handleClosePause();
     else if (activeMinigame) handleMinigameExit();
     else if (activeDialogue) handleDialogueClose();
     else if (gateScreenOpen) handleCancelGate();
-    else setPaused(true);
+    else handleOpenPause();
   }
 
   if (revealStatus === "loading") {
@@ -289,18 +295,35 @@ export default function PublicGameRoute() {
     return (
       <div className="grp-app-shell">
         <div className="grp-console grp-console--framed">
-          <div className="grp-viewport-frame">
-            <span className="grp-console-led" aria-hidden="true" />
-            <span className="grp-console-screw grp-console-screw--tl" aria-hidden="true" />
-            <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
-            <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
-            <div className="grp-viewport">
-              <div className="grp-not-ready-screen">
-                <p className="grp-not-ready-message">
-                  The adventure is not ready yet. Please ask the event organizer for help.
-                </p>
+          <div className="grp-console-header">
+            <span className="grp-console-comm">△ COMM.</span>
+          </div>
+          <div className="grp-console-body">
+            <div className="grp-console-power">
+              <span className="grp-console-power-dot" aria-hidden="true" />
+              <span className="grp-console-power-waves" aria-hidden="true">
+                )))
+              </span>
+              <span className="grp-console-power-label">POWER</span>
+            </div>
+            <div className="grp-viewport-frame">
+              <span className="grp-console-screw grp-console-screw--tr" aria-hidden="true" />
+              <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
+              <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
+              <div className="grp-viewport">
+                <div className="grp-not-ready-screen">
+                  <p className="grp-not-ready-message">
+                    The adventure is not ready yet. Please ask the event organizer for help.
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
+          <div className="grp-console-wordmark">
+            <span className="grp-console-nintendo">Nintendo</span>
+            <span className="grp-console-gbc-logo">
+              GAME BOY <span className="grp-gbc-color">COLOR</span>
+            </span>
           </div>
         </div>
       </div>
@@ -310,12 +333,22 @@ export default function PublicGameRoute() {
   return (
     <div className="grp-app-shell">
       <div className="grp-console grp-console--framed">
-        <div className="grp-viewport-frame">
-          <span className="grp-console-led" aria-hidden="true" />
-          <span className="grp-console-screw grp-console-screw--tl" aria-hidden="true" />
-          <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
-          <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
-          <div className="grp-viewport">
+        <div className="grp-console-header">
+          <span className="grp-console-comm">△ COMM.</span>
+        </div>
+        <div className="grp-console-body">
+          <div className="grp-console-power">
+            <span className="grp-console-power-dot" aria-hidden="true" />
+            <span className="grp-console-power-waves" aria-hidden="true">
+              )))
+            </span>
+            <span className="grp-console-power-label">POWER</span>
+          </div>
+          <div className="grp-viewport-frame">
+            <span className="grp-console-screw grp-console-screw--tr" aria-hidden="true" />
+            <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
+            <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
+            <div className="grp-viewport">
             {screen === "title" && (
               <TitleScreen
                 hasSavedProgress={hasSavedProgress()}
@@ -343,7 +376,7 @@ export default function PublicGameRoute() {
                 <div className="grp-hud-layer">
                   <ClueTracker collectedClues={progress.collectedClues} />
                   <div className="grp-top-bar">
-                    <button type="button" className="grp-icon-btn" onClick={() => setPaused(true)} aria-label="Open menu">
+                    <button type="button" className="grp-icon-btn" onClick={handleOpenPause} aria-label="Open menu">
                       ☰
                     </button>
                   </div>
@@ -403,22 +436,13 @@ export default function PublicGameRoute() {
                     reducedMotion={progress.reducedMotion}
                     onToggleSound={() => setSoundEnabled(!progress.soundEnabled)}
                     onToggleReducedMotion={() => setReducedMotion(!progress.reducedMotion)}
-                    onResume={() => setPaused(false)}
+                    onResume={handleClosePause}
                     onResetProgress={handleResetProgress}
                     onReturnToTitle={handleReturnToTitle}
                     onFullscreen={toggleFullscreen}
                   />
                 )}
 
-                {showTouchControls && !anyOverlayOpen && (
-                  <MobileControls
-                    onAction={handleMobileAction}
-                    onBack={handleMobileBack}
-                    onMenu={() => setPaused(true)}
-                    onMute={() => setSoundEnabled(!progress.soundEnabled)}
-                    muted={!progress.soundEnabled}
-                  />
-                )}
               </>
             )}
 
@@ -428,7 +452,21 @@ export default function PublicGameRoute() {
               </div>
             )}
           </div>
+          </div>
         </div>
+        <div className="grp-console-wordmark">
+          <span className="grp-console-nintendo">Nintendo</span>
+          <span className="grp-console-gbc-logo">
+            GAME BOY <span className="grp-gbc-color">COLOR</span>
+          </span>
+        </div>
+        <MobileControls
+          onAction={handleMobileAction}
+          onBack={handleMobileBack}
+          onMenu={handleOpenPause}
+          onMute={() => setSoundEnabled(!progress.soundEnabled)}
+          muted={!progress.soundEnabled}
+        />
       </div>
     </div>
   );

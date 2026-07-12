@@ -41,7 +41,7 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
   }
 
   return (
-    <div className="grp-mobile-controls" aria-label="Touch controls">
+    <div className="grp-console-deck" aria-label="Console controls">
       <div className="grp-dpad-cross" role="group" aria-label="Directional pad">
         <button type="button" className="grp-dpad-btn grp-dpad-up" aria-label="Move up" {...dpadHandlers("up")}>
           ▲
@@ -59,12 +59,18 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
       </div>
 
       <div className="grp-center-buttons" role="group" aria-label="System buttons">
-        <button type="button" className="grp-pill-btn" onClick={onMute} aria-pressed={muted} aria-label="Mute toggle">
-          Select
-        </button>
-        <button type="button" className="grp-pill-btn" onClick={onMenu} aria-label="Menu">
-          Start
-        </button>
+        <span className="grp-pill-column">
+          <button type="button" className="grp-pill-btn" onClick={onMute} aria-pressed={muted} aria-label="Mute toggle" />
+          <span className="grp-pill-label" aria-hidden="true">
+            SELECT
+          </span>
+        </span>
+        <span className="grp-pill-column">
+          <button type="button" className="grp-pill-btn" onClick={onMenu} aria-label="Menu" />
+          <span className="grp-pill-label" aria-hidden="true">
+            START
+          </span>
+        </span>
       </div>
 
       <div className="grp-action-cluster" role="group" aria-label="Action buttons">
@@ -74,6 +80,12 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
         <button type="button" className="grp-action-btn grp-action-a" onClick={onAction} aria-label="Confirm / Interact">
           A
         </button>
+      </div>
+
+      <div className="grp-speaker" aria-hidden="true">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <span key={i} className="grp-speaker-dot" />
+        ))}
       </div>
     </div>
   );
