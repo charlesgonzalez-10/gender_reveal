@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: space-between;
   gap: clamp(2px, 1.2vw, 8px);
-  padding: 0.6rem clamp(4px, 2vw, 14px) 0.9rem;
+  padding: 1.3rem clamp(4px, 2vw, 14px) 2rem;
   touch-action: none;
 }
 
