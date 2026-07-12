@@ -26,13 +26,79 @@
   box-sizing: border-box;
 }
 
+/* Game Boy Advance shell: rounded indigo case, shoulder-button notches,
+   a power LED, and corner screws so the whole layout reads as a handheld
+   console rather than a plain rounded rectangle. */
 .grp-console--framed .grp-viewport-frame {
-  background: linear-gradient(165deg, #6b3fa0 0%, #4d2b7a 55%, #3a2060 100%);
-  border-radius: 28px;
-  padding: clamp(10px, 2.4vw, 22px);
+  position: relative;
+  background: linear-gradient(165deg, #7a53c9 0%, #5b3ba3 45%, #432c7a 100%);
+  border-radius: 22px 22px 34px 34px;
+  padding: clamp(14px, 3vw, 26px) clamp(10px, 2.4vw, 22px) clamp(20px, 4vw, 34px);
   box-shadow:
-    inset 0 0 0 3px rgba(255, 255, 255, 0.15),
+    inset 0 2px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 3px rgba(0, 0, 0, 0.25),
     0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+/* Shoulder buttons (L / R) — notches cut into the top edge */
+.grp-console--framed .grp-viewport-frame::before,
+.grp-console--framed .grp-viewport-frame::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 22%;
+  max-width: 90px;
+  height: clamp(10px, 2vw, 16px);
+  background: linear-gradient(180deg, #2a1c4d, #1a1130);
+  border-radius: 8px 8px 0 0;
+  box-shadow: inset 0 2px 2px rgba(0, 0, 0, 0.6);
+}
+
+.grp-console--framed .grp-viewport-frame::before {
+  left: 6%;
+  transform: skewX(-8deg);
+}
+
+.grp-console--framed .grp-viewport-frame::after {
+  right: 6%;
+  transform: skewX(8deg);
+}
+
+/* Power LED */
+.grp-console-led {
+  position: absolute;
+  top: clamp(6px, 1.6vw, 12px);
+  left: clamp(10px, 2.4vw, 18px);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #59ff8a;
+  box-shadow: 0 0 4px 2px rgba(89, 255, 138, 0.75);
+  z-index: 2;
+}
+
+/* Corner screws */
+.grp-console-screw {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a2a5e, #16102a);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+.grp-console-screw--tl {
+  top: clamp(6px, 1.6vw, 12px);
+  right: clamp(10px, 2.4vw, 18px);
+}
+.grp-console-screw--bl {
+  bottom: clamp(8px, 2vw, 16px);
+  left: clamp(10px, 2.4vw, 18px);
+}
+.grp-console-screw--br {
+  bottom: clamp(8px, 2vw, 16px);
+  right: clamp(10px, 2.4vw, 18px);
 }
 
 .grp-viewport {
@@ -49,6 +115,11 @@
 
 .grp-console--framed .grp-viewport {
   border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 2px #000,
+    0 0 0 4px #17172a,
+    0 0 0 7px #050508,
+    inset 0 -10px 18px rgba(0, 0, 0, 0.35);
 }
 
 .grp-viewport canvas {

@@ -42,13 +42,14 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
 
   return (
     <div className="grp-mobile-controls" aria-label="Touch controls">
-      <div className="grp-dpad" role="group" aria-label="Directional pad">
+      <div className="grp-dpad-cross" role="group" aria-label="Directional pad">
         <button type="button" className="grp-dpad-btn grp-dpad-up" aria-label="Move up" {...dpadHandlers("up")}>
           ▲
         </button>
         <button type="button" className="grp-dpad-btn grp-dpad-left" aria-label="Move left" {...dpadHandlers("left")}>
           ◀
         </button>
+        <span className="grp-dpad-hub" aria-hidden="true" />
         <button type="button" className="grp-dpad-btn grp-dpad-right" aria-label="Move right" {...dpadHandlers("right")}>
           ▶
         </button>
@@ -57,18 +58,21 @@ export default function MobileControls({ onAction, onBack, onMenu, onMute, muted
         </button>
       </div>
 
-      <div className="grp-action-cluster" role="group" aria-label="Action buttons">
-        <button type="button" className="grp-action-btn grp-action-menu" onClick={onMenu} aria-label="Menu">
-          ☰
+      <div className="grp-center-buttons" role="group" aria-label="System buttons">
+        <button type="button" className="grp-pill-btn" onClick={onMute} aria-pressed={muted} aria-label="Mute toggle">
+          Select
         </button>
-        <button type="button" className="grp-action-btn grp-action-mute" onClick={onMute} aria-pressed={muted} aria-label="Mute toggle">
-          {muted ? "🔇" : "🔊"}
+        <button type="button" className="grp-pill-btn" onClick={onMenu} aria-label="Menu">
+          Start
+        </button>
+      </div>
+
+      <div className="grp-action-cluster" role="group" aria-label="Action buttons">
+        <button type="button" className="grp-action-btn grp-action-b" onClick={onBack} aria-label="Back / Close">
+          B
         </button>
         <button type="button" className="grp-action-btn grp-action-a" onClick={onAction} aria-label="Confirm / Interact">
           A
-        </button>
-        <button type="button" className="grp-action-btn grp-action-b" onClick={onBack} aria-label="Back / Close">
-          B
         </button>
       </div>
     </div>

@@ -14,18 +14,18 @@
   pointer-events: auto;
 }
 
-.grp-dpad {
+/* Cross-shaped D-pad: 3x3 grid, corners left empty so the arms read as
+   a single plus rather than four separate squares. */
+.grp-dpad-cross {
   position: relative;
-  width: 116px;
-  height: 116px;
+  display: grid;
+  grid-template-columns: repeat(3, 38px);
+  grid-template-rows: repeat(3, 38px);
   touch-action: none;
 }
 
 .grp-dpad-btn {
-  position: absolute;
-  width: 38px;
-  height: 38px;
-  background: rgba(20, 20, 31, 0.85);
+  background: rgba(20, 20, 31, 0.9);
   border: 2px solid #f4f4f4;
   color: #fff;
   font-size: 1rem;
@@ -37,31 +37,69 @@
 }
 
 .grp-dpad-up {
-  top: 0;
-  left: 39px;
+  grid-column: 2;
+  grid-row: 1;
+  border-radius: 6px 6px 0 0;
 }
 .grp-dpad-down {
-  bottom: 0;
-  left: 39px;
+  grid-column: 2;
+  grid-row: 3;
+  border-radius: 0 0 6px 6px;
 }
 .grp-dpad-left {
-  top: 39px;
-  left: 0;
+  grid-column: 1;
+  grid-row: 2;
+  border-radius: 6px 0 0 6px;
 }
 .grp-dpad-right {
-  top: 39px;
-  right: 0;
+  grid-column: 3;
+  grid-row: 2;
+  border-radius: 0 6px 6px 0;
 }
 
+.grp-dpad-hub {
+  grid-column: 2;
+  grid-row: 2;
+  background: rgba(20, 20, 31, 0.9);
+  border-top: 2px solid #f4f4f4;
+  border-bottom: 2px solid #f4f4f4;
+}
+
+/* Select / Start pills, centered between the D-pad and action buttons */
+.grp-center-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-self: flex-end;
+  margin-bottom: 6px;
+}
+
+.grp-pill-btn {
+  min-width: 52px;
+  height: 20px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: rgba(20, 20, 31, 0.9);
+  border: 2px solid #f4f4f4;
+  color: #fff;
+  font-size: 0.45rem;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+
+/* Diagonal A / B cluster, matching the classic handheld layout: B low
+   and to the left, A high and to the right. */
 .grp-action-cluster {
-  display: grid;
-  grid-template-columns: repeat(2, 44px);
-  grid-template-rows: repeat(2, 44px);
-  gap: 0.4rem;
-  align-items: end;
+  position: relative;
+  width: 100px;
+  height: 92px;
+  touch-action: none;
 }
 
 .grp-action-btn {
+  position: absolute;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -76,7 +114,14 @@
 }
 
 .grp-action-a {
+  top: 0;
+  right: 0;
   background: rgba(76, 175, 109, 0.85);
+}
+
+.grp-action-b {
+  bottom: 0;
+  left: 0;
 }
 
 @media (pointer: fine) and (hover: hover) {

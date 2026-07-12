@@ -288,8 +288,12 @@ export default function PublicGameRoute() {
   if (revealStatus === "not-set" || revealStatus === "error") {
     return (
       <div className="grp-app-shell">
-        <div className="grp-console">
+        <div className="grp-console grp-console--framed">
           <div className="grp-viewport-frame">
+            <span className="grp-console-led" aria-hidden="true" />
+            <span className="grp-console-screw grp-console-screw--tl" aria-hidden="true" />
+            <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
+            <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
             <div className="grp-viewport">
               <div className="grp-not-ready-screen">
                 <p className="grp-not-ready-message">
@@ -307,6 +311,10 @@ export default function PublicGameRoute() {
     <div className="grp-app-shell">
       <div className="grp-console grp-console--framed">
         <div className="grp-viewport-frame">
+          <span className="grp-console-led" aria-hidden="true" />
+          <span className="grp-console-screw grp-console-screw--tl" aria-hidden="true" />
+          <span className="grp-console-screw grp-console-screw--bl" aria-hidden="true" />
+          <span className="grp-console-screw grp-console-screw--br" aria-hidden="true" />
           <div className="grp-viewport">
             {screen === "title" && (
               <TitleScreen
