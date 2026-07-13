@@ -23,6 +23,15 @@ export type SfxName =
 
 export type MusicTrack = "title" | "town" | "challenge" | "reveal" | "none";
 
+interface TrackConfig {
+  notes: number[];
+  stepDuration: number;
+  waveform: OscillatorType;
+  /** Adds a driving rhythmic tick under the melody — used for the title
+   * theme's more energetic, adventure-fanfare feel. */
+  pulse?: boolean;
+}
+
 class SoundManager {
   private ctx: AudioContext | null = null;
   private musicGain: GainNode | null = null;
@@ -204,15 +213,24 @@ class SoundManager {
     const ctx = this.ensureContext();
     if (!ctx || !this.musicGain) return;
 
-    const patterns: Record<Exclude<MusicTrack, "none">, number[]> = {
-      title: [392, 440, 494, 440, 523, 494, 440, 392],
-      town: [330, 392, 440, 392, 330, 294, 330, 392],
-      challenge: [440, 494, 523, 494, 440, 494, 523, 587],
-      reveal: [523, 587, 659, 784, 880, 784, 659, 587],
+    const configs: Record<Exclude<MusicTrack, "none">, TrackConfig> = {
+      // A punchier, faster, triumphant original fanfare for the title —
+      // a bright square-wave lead with a driving rhythmic pulse under it,
+      // reaching for that "adventure is about to begin" energy without
+      // reusing any specific copyrighted melody.
+      title: {
+        notes: [392, 392, 587, 494, 587, 784, 659, 784],
+        stepDuration: 0.24,
+        waveform: "square",
+        pulse: true,
+      },
+      town: { notes: [330, 392, 440, 392, 330, 294, 330, 392], stepDuration: 0.42, waveform: "triangle" },
+      challenge: { notes: [440, 494, 523, 494, 440, 494, 523, 587], stepDuration: 0.42, waveform: "triangle" },
+      reveal: { notes: [523, 587, 659, 784, 880, 784, 659, 587], stepDuration: 0.42, waveform: "triangle" },
     };
-    const notes = patterns[track];
+    const config = configs[track];
+    const { notes, stepDuration, waveform } = config;
     let step = 0;
-    const stepDuration = 0.42;
     const gain = this.musicGain;
 
     // A soft, sustained low drone under the melody — held for the whole
@@ -224,7 +242,7 @@ class SoundManager {
     drone.type = "sine";
     drone.frequency.value = droneFreq;
     droneGain.gain.setValueAtTime(0, ctx.currentTime);
-    droneGain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 1.2);
+    droneGain.gain.linearRampToValueAtTime(config.pulse ? 0.035 : 0.05, ctx.currentTime + 1.2);
     drone.connect(droneGain);
     droneGain.connect(gain);
     drone.start();
@@ -237,10 +255,10 @@ class SoundManager {
       // Main body of the note.
       const osc = ctx.createOscillator();
       const noteGain = ctx.createGain();
-      osc.type = "triangle";
+      osc.type = waveform;
       osc.frequency.value = freq;
       noteGain.gain.setValueAtTime(0, now);
-      noteGain.gain.linearRampToValueAtTime(0.15, now + 0.05);
+      noteGain.gain.linearRampToValueAtTime(config.pulse ? 0.13 : 0.15, now + 0.03);
       noteGain.gain.exponentialRampToValueAtTime(0.001, now + stepDuration * 0.9);
       osc.connect(noteGain);
       noteGain.connect(gain);
@@ -260,6 +278,10 @@ class SoundManager {
       bell.start(now);
       bell.stop(now + stepDuration * 0.4);
 
+      // A driving rhythmic tick on every step — this is what gives the
+      // title theme forward momentum instead of just a floating melody.
+      if (config.pulse) this.musicTick(ctx, now, gain);
+
       step += 1;
     };
 
@@ -273,6 +295,27 @@ class SoundManager {
         drone.stop(stopAt + 0.05);
       },
     };
+  }
+
+  private musicTick(ctx: AudioContext, start: number, destination: GainNode): void {
+    const duration = 0.045;
+    const bufferSize = Math.floor(ctx.sampleRate * duration);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "highpass";
+    filter.frequency.value = 4500;
+    const tickGain = ctx.createGain();
+    tickGain.gain.value = 0.05;
+    source.connect(filter);
+    filter.connect(tickGain);
+    tickGain.connect(destination);
+    source.start(start);
   }
 
   stopMusic(): void {
