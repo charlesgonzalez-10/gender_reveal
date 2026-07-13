@@ -7,6 +7,7 @@ interface GameContextValue {
   progress: GameProgress;
   setTrainerName: (name: string) => void;
   markIntroStarted: () => void;
+  markControlsTutorialSeen: () => void;
   completeChallenge: (pokemon: PokemonId) => ClueId;
   isChallengeComplete: (pokemon: PokemonId) => boolean;
   savePlayerPosition: (position: PlayerPosition) => void;
@@ -39,6 +40,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const markIntroStarted = useCallback(() => {
     setProgress((p) => (p.hasStartedIntro ? p : { ...p, hasStartedIntro: true }));
+  }, []);
+
+  const markControlsTutorialSeen = useCallback(() => {
+    setProgress((p) => (p.hasSeenControlsTutorial ? p : { ...p, hasSeenControlsTutorial: true }));
   }, []);
 
   const isChallengeComplete = useCallback(
@@ -96,6 +101,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         progress,
         setTrainerName,
         markIntroStarted,
+        markControlsTutorialSeen,
         completeChallenge,
         isChallengeComplete,
         savePlayerPosition,

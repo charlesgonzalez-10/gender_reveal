@@ -9,6 +9,7 @@ interface QuickAccessOverlayProps {
   soundEnabled: boolean;
   onToggleSound: () => void;
   onClose: () => void;
+  onOpenHelp: () => void;
 }
 
 const ALL_CLUES: { id: ClueId; label: string }[] = [
@@ -20,7 +21,7 @@ const ALL_CLUES: { id: ClueId; label: string }[] = [
 
 /** Select's quick-access screen: a bigger clue tracker plus the sound
  * toggle, reachable without ever leaving the map. */
-export default function QuickAccessOverlay({ collectedClues, soundEnabled, onToggleSound, onClose }: QuickAccessOverlayProps) {
+export default function QuickAccessOverlay({ collectedClues, soundEnabled, onToggleSound, onClose, onOpenHelp }: QuickAccessOverlayProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   useGbcScope(rootRef, { onBack: onClose });
 
@@ -40,6 +41,9 @@ export default function QuickAccessOverlay({ collectedClues, soundEnabled, onTog
         <div className="grp-minigame-actions">
           <button type="button" className="grp-btn" onClick={onToggleSound} aria-pressed={soundEnabled}>
             {soundEnabled ? "🔊 Sound On" : "🔇 Sound Off"}
+          </button>
+          <button type="button" className="grp-btn" onClick={onOpenHelp}>
+            How to Play
           </button>
           <button type="button" className="grp-btn grp-btn--primary" onClick={onClose} data-gbc-default>
             Close

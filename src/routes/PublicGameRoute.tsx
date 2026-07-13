@@ -16,6 +16,7 @@ import ClueTracker from "../components/ClueTracker";
 import MobileControls from "../components/MobileControls";
 import PauseMenu from "../components/PauseMenu";
 import QuickAccessOverlay from "../components/QuickAccessOverlay";
+import ControlsTutorialOverlay from "../components/ControlsTutorialOverlay";
 import FinalGateScreen from "../components/FinalReveal/FinalGateScreen";
 import FinalRevealSequence from "../components/FinalReveal/FinalRevealSequence";
 import MemoryMatchGame from "../components/Minigames/MemoryMatchGame";
@@ -41,6 +42,7 @@ export default function PublicGameRoute() {
     progress,
     setTrainerName,
     markIntroStarted,
+    markControlsTutorialSeen,
     isChallengeComplete,
     completeChallenge,
     savePlayerPosition,
@@ -58,6 +60,7 @@ export default function PublicGameRoute() {
   const [finalRevealWord, setFinalRevealWord] = useState<RevealWord | null>(null);
   const [paused, setPaused] = useState(false);
   const [quickAccessOpen, setQuickAccessOpen] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [gameMountKey, setGameMountKey] = useState(0);
   const phaserGameRef = useRef<Phaser.Game | null>(null);
@@ -66,7 +69,7 @@ export default function PublicGameRoute() {
   // the top-level GBC handlers below should defer to that overlay's own
   // useGbcScope instead of falling back to map movement/interaction.
   const anyOverlayOpen = Boolean(
-    activeDialogue || activeMinigame || gateScreenOpen || finalRevealActive || paused || quickAccessOpen,
+    activeDialogue || activeMinigame || gateScreenOpen || finalRevealActive || paused || quickAccessOpen || tutorialOpen,
   );
   const overlayOpenRef = useRef(anyOverlayOpen);
   overlayOpenRef.current = anyOverlayOpen;
@@ -156,6 +159,20 @@ export default function PublicGameRoute() {
       }
     }, 4000);
     return () => window.clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
+
+  // Shows the "How to Play" overlay for returning players (an existing save
+  // that already got past the professor's intro) who haven't seen it yet.
+  // Brand-new players get it chained after the professor's intro dialogue
+  // instead (see handleDialogueClose) so it never races with that Phaser-
+  // triggered auto-intro for focus. Never shows again once dismissed
+  // (persisted in progress), but stays reachable via Select.
+  useEffect(() => {
+    if (screen === "game" && progress.hasStartedIntro && !progress.hasSeenControlsTutorial) {
+      gameEvents.emit(GameEvent.LockMovement);
+      setTutorialOpen(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen]);
 
@@ -278,12 +295,18 @@ export default function PublicGameRoute() {
     if (!payload) return;
     gameEvents.emit(GameEvent.DialogueClosed, payload);
 
-    if (payload.kind === "professor" && !progress.hasStartedIntro) {
+    const wasFirstIntro = payload.kind === "professor" && !progress.hasStartedIntro;
+    if (wasFirstIntro) {
       markIntroStarted();
     }
 
     if (payload.kind === "pokemon" && payload.pokemonId && !isChallengeComplete(payload.pokemonId)) {
       setActiveMinigame(payload.pokemonId);
+      return;
+    }
+
+    if (wasFirstIntro && !progress.hasSeenControlsTutorial) {
+      setTutorialOpen(true);
       return;
     }
 
@@ -342,6 +365,17 @@ export default function PublicGameRoute() {
     setPaused(false);
     setScreen("title");
     setGameMountKey((k) => k + 1);
+  }
+
+  function handleCloseTutorial() {
+    markControlsTutorialSeen();
+    setTutorialOpen(false);
+    gameEvents.emit(GameEvent.UnlockMovement);
+  }
+
+  function handleOpenHelpFromQuickAccess() {
+    setQuickAccessOpen(false);
+    setTutorialOpen(true);
   }
 
   function handleOpenPause() {
@@ -509,8 +543,11 @@ export default function PublicGameRoute() {
                     soundEnabled={progress.soundEnabled}
                     onToggleSound={() => setSoundEnabled(!progress.soundEnabled)}
                     onClose={() => setQuickAccessOpen(false)}
+                    onOpenHelp={handleOpenHelpFromQuickAccess}
                   />
                 )}
+
+                {tutorialOpen && !finalRevealActive && <ControlsTutorialOverlay onClose={handleCloseTutorial} />}
               </>
             )}
 

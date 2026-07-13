@@ -1,0 +1,58 @@
+.grp-tutorial-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 5, 10, 0.9);
+  padding: 1rem;
+}
+
+.grp-tutorial-panel {
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  text-align: center;
+  font-size: 0.62rem;
+  width: min(310px, 100%);
+}
+
+.grp-tutorial-panel h2 {
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.grp-tutorial-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.grp-tutorial-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4em 0.55em;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  text-align: left;
+}
+
+.grp-tutorial-key {
+  flex: 0 0 auto;
+  min-width: 3.6em;
+  color: #ffd54f;
+  font-weight: bold;
+}
+
+.grp-tutorial-desc {
+  flex: 1;
+  opacity: 0.9;
+}

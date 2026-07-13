@@ -26,6 +26,7 @@ export interface GameProgress {
   reducedMotion: boolean;
   gameCompleted: boolean;
   hasStartedIntro: boolean;
+  hasSeenControlsTutorial: boolean;
 }
 
 export const DEFAULT_PLAYER_POSITION: PlayerPosition = {
@@ -46,5 +47,6 @@ export function createDefaultProgress(trainerName: string): GameProgress {
     reducedMotion: false,
     gameCompleted: false,
     hasStartedIntro: false,
+    hasSeenControlsTutorial: false,
   };
 }
