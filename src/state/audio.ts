@@ -43,6 +43,23 @@ class SoundManager {
         this.musicGain = this.ctx.createGain();
         this.musicGain.gain.value = this.muted ? 0 : this.musicVolume;
         this.musicGain.connect(this.ctx.destination);
+
+        // A gentle music-box-style echo send on top of the dry signal —
+        // short delay with modest feedback — for the wistful, bell-like
+        // atmosphere classic handheld town themes are loved for, without
+        // reproducing any specific copyrighted melody.
+        const delay = this.ctx.createDelay(1.0);
+        delay.delayTime.value = 0.24;
+        const feedback = this.ctx.createGain();
+        feedback.gain.value = 0.3;
+        const wet = this.ctx.createGain();
+        wet.gain.value = 0.32;
+        this.musicGain.connect(delay);
+        delay.connect(feedback);
+        feedback.connect(delay);
+        delay.connect(wet);
+        wet.connect(this.ctx.destination);
+
         this.sfxGain = this.ctx.createGain();
         this.sfxGain.gain.value = this.muted ? 0 : this.sfxVolume;
         this.sfxGain.connect(this.ctx.destination);
@@ -198,10 +215,26 @@ class SoundManager {
     const stepDuration = 0.42;
     const gain = this.musicGain;
 
+    // A soft, sustained low drone under the melody — held for the whole
+    // loop rather than re-triggered per note — adds the warm, layered
+    // "pad" quality that makes a simple melody feel like a fuller theme.
+    const droneFreq = notes[0] / 4;
+    const drone = ctx.createOscillator();
+    const droneGain = ctx.createGain();
+    drone.type = "sine";
+    drone.frequency.value = droneFreq;
+    droneGain.gain.setValueAtTime(0, ctx.currentTime);
+    droneGain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 1.2);
+    drone.connect(droneGain);
+    droneGain.connect(gain);
+    drone.start();
+
     const scheduleStep = () => {
       if (this.currentTrack !== track) return;
       const now = ctx.currentTime;
       const freq = notes[step % notes.length];
+
+      // Main body of the note.
       const osc = ctx.createOscillator();
       const noteGain = ctx.createGain();
       osc.type = "triangle";
@@ -213,13 +246,32 @@ class SoundManager {
       noteGain.connect(gain);
       osc.start(now);
       osc.stop(now + stepDuration);
+
+      // A quiet, fast-decaying octave-up overtone on the attack only —
+      // this is what gives a plain tone its "music box chime" character.
+      const bell = ctx.createOscillator();
+      const bellGain = ctx.createGain();
+      bell.type = "sine";
+      bell.frequency.value = freq * 2;
+      bellGain.gain.setValueAtTime(0.09, now);
+      bellGain.gain.exponentialRampToValueAtTime(0.001, now + stepDuration * 0.35);
+      bell.connect(bellGain);
+      bellGain.connect(gain);
+      bell.start(now);
+      bell.stop(now + stepDuration * 0.4);
+
       step += 1;
     };
 
     scheduleStep();
     const intervalId = window.setInterval(scheduleStep, stepDuration * 1000);
     this.currentMusicNodes = {
-      stop: () => window.clearInterval(intervalId),
+      stop: () => {
+        window.clearInterval(intervalId);
+        const stopAt = ctx.currentTime + 0.05;
+        droneGain.gain.exponentialRampToValueAtTime(0.001, stopAt);
+        drone.stop(stopAt + 0.05);
+      },
     };
   }
 
