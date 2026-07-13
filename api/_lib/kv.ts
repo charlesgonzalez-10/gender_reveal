@@ -1,5 +1,5 @@
 import { Redis } from "@upstash/redis";
-import { RevealStore } from "./store";
+import { RevealStore } from "./store.js";
 
 /**
  * Supports both the historical Vercel KV env var names and the current

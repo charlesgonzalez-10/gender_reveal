@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getStore } from "../_lib/kv";
-import { verifyAdminToken } from "../_lib/adminAuth";
+import { getStore } from "../_lib/kv.js";
+import { verifyAdminToken } from "../_lib/adminAuth.js";
 
 function bearerToken(req: VercelRequest): string | null {
   const header = req.headers.authorization;

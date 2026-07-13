@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getStore } from "../_lib/kv";
+import { getStore } from "../_lib/kv.js";
 
 /**
  * Public, but only ever called by the client at the moment the final

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getStore } from "../_lib/kv";
+import { getStore } from "../_lib/kv.js";
 
 /**
  * Public. Never exposes the sealed reveal value — only whether one has
