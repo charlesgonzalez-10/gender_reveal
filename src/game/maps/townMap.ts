@@ -15,6 +15,7 @@ export type TileType =
   | "building"
   | "labfloor"
   | "cavefloor"
+  | "meadow"
   | "sign"
   | "gate"
   | "gateopen"
@@ -88,8 +89,9 @@ function buildTownGrid(): TileType[][] {
   rect(grid, 4, 17, 6, 4, "water");
   grid[13][6] = "path";
 
-  // Electrical clearing (Pikachu) — bottom middle
-  rect(grid, 14, 17, 7, 5, "path");
+  // Thunder Meadow (Pikachu) — bottom middle, its own golden-green ground
+  // instead of reusing the generic path tile.
+  rect(grid, 14, 17, 7, 5, "meadow");
   grid[17][14] = "rock";
   grid[17][20] = "rock";
   grid[21][14] = "rock";

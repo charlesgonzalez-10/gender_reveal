@@ -42,25 +42,49 @@ export function generateTileTextures(scene: Phaser.Scene): void {
     g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
     drawSpeckles(g, 0xc4ac6f, 6, 2);
   });
+  // Flower Garden ground (Bulbasaur) — lusher and more colorful than plain
+  // tall grass, with tiny pink/gold flecks so the garden reads distinctly
+  // even before you spot the scattered flower tiles.
   makeTileTexture(scene, tileKey("tallgrass"), (g) => {
-    g.fillStyle(0x2f7a3d, 1);
+    g.fillStyle(0x2f8a4d, 1);
     g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    g.fillStyle(0x3f9a4a, 1);
+    g.fillStyle(0x4fb56a, 1);
     for (let i = 2; i < TILE_SIZE; i += 4) {
       g.fillRect(i, 2, 2, 12);
     }
+    g.fillStyle(0xffd6ec, 0.7);
+    g.fillRect(3, 4, 1, 1);
+    g.fillRect(11, 9, 1, 1);
   });
+  // Crystal Pond water (Squirtle) — a brighter, more turquoise blue with a
+  // sparkle highlight instead of the plain flat blue used before.
   makeTileTexture(scene, tileKey("water"), (g) => {
-    g.fillStyle(0x3a7bd5, 1);
+    g.fillStyle(0x2fa8c9, 1);
     g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    g.fillStyle(0x5b9be8, 1);
+    g.fillStyle(0x7fe0e8, 1);
     g.fillRect(0, 6, TILE_SIZE, 2);
+    g.fillStyle(0xe8fdff, 0.9);
+    g.fillRect(11, 3, 1, 1);
+    g.fillRect(4, 11, 1, 1);
   });
   makeTileTexture(scene, tileKey("water2"), (g) => {
-    g.fillStyle(0x3a7bd5, 1);
+    g.fillStyle(0x2fa8c9, 1);
     g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    g.fillStyle(0x5b9be8, 1);
+    g.fillStyle(0x7fe0e8, 1);
     g.fillRect(0, 9, TILE_SIZE, 2);
+    g.fillStyle(0xe8fdff, 0.9);
+    g.fillRect(6, 3, 1, 1);
+    g.fillRect(12, 11, 1, 1);
+  });
+  // Thunder Meadow ground (Pikachu) — warm yellow-green with tiny spark
+  // flecks, distinct from every other walkable surface in town.
+  makeTileTexture(scene, tileKey("meadow"), (g) => {
+    g.fillStyle(0x9ec93f, 1);
+    g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+    drawSpeckles(g, 0x86b02f, 5, 2);
+    g.fillStyle(0xfff29e, 0.85);
+    g.fillRect(7, 5, 1, 1);
+    g.fillRect(10, 10, 1, 1);
   });
   makeTileTexture(scene, tileKey("sand"), (g) => {
     g.fillStyle(0xe4cf94, 1);
@@ -77,12 +101,15 @@ export function generateTileTextures(scene: Phaser.Scene): void {
     g.fillStyle(0x2b7538, 1);
     g.fillCircle(6, 5, 4);
   });
+  // Warmed from cold gray to a sun-baked terracotta so it reads as part of
+  // Ember Camp's walls rather than a cold cavern (also used for Thunder
+  // Meadow's boundary boulders).
   makeTileTexture(scene, tileKey("rock"), (g) => {
-    g.fillStyle(0x555b66, 1);
+    g.fillStyle(0x6e5a52, 1);
     g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    g.fillStyle(0x7c828e, 1);
+    g.fillStyle(0x967a6a, 1);
     g.fillEllipse(8, 9, 12, 10);
-    g.fillStyle(0x484d57, 1);
+    g.fillStyle(0x5a4640, 1);
     g.fillEllipse(8, 12, 10, 5);
   });
   makeTileTexture(scene, tileKey("flower"), (g) => {
@@ -120,10 +147,12 @@ export function generateTileTextures(scene: Phaser.Scene): void {
     g.fillRect(0, 0, TILE_SIZE, 1);
     g.fillRect(0, TILE_SIZE - 1, TILE_SIZE, 1);
   });
+  // Ember Camp ground (Charmander) — warm sun-baked red-brown instead of
+  // cold cave gray, so it reads as a cozy campsite rather than a cavern.
   makeTileTexture(scene, tileKey("cavefloor"), (g) => {
-    g.fillStyle(0x4a4038, 1);
+    g.fillStyle(0x6b3a2e, 1);
     g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    drawSpeckles(g, 0x3a3129, 6, 2);
+    drawSpeckles(g, 0x854a38, 6, 2);
   });
   makeTileTexture(scene, tileKey("sign"), (g) => {
     g.fillStyle(0x3f9a4a, 1);

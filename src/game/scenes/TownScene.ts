@@ -149,7 +149,7 @@ export class TownScene extends Phaser.Scene {
         img.setDepth(0);
         if (tile === "water") this.waterTiles.push(img);
         if (tile === "tree") this.treeTiles.push(img);
-        if (tile === "flower" || tile === "tallgrass") this.swayTiles.push(img);
+        if (tile === "flower" || tile === "tallgrass" || tile === "meadow") this.swayTiles.push(img);
         spriteRow.push(img);
       }
       this.tileSprites.push(spriteRow);
@@ -325,6 +325,7 @@ export class TownScene extends Phaser.Scene {
     this.spawnButterflies();
     this.spawnLeaves();
     this.spawnChimneySmoke();
+    this.spawnMeadowSparks();
   }
 
   private spawnButterflies() {
@@ -393,6 +394,29 @@ export class TownScene extends Phaser.Scene {
           duration: 2600,
           ease: "Sine.easeOut",
           onComplete: () => puff.destroy(),
+        });
+      },
+    });
+  }
+
+  private spawnMeadowSparks() {
+    // Little spark motes drifting up out of Thunder Meadow's grass.
+    const meadow = { x: 14 * TILE_SIZE, y: 17 * TILE_SIZE, w: 7 * TILE_SIZE, h: 5 * TILE_SIZE };
+    this.time.addEvent({
+      delay: 900,
+      loop: true,
+      callback: () => {
+        const x = meadow.x + Math.random() * meadow.w;
+        const y = meadow.y + meadow.h * 0.6 + Math.random() * meadow.h * 0.4;
+        const spark = this.add.image(x, y, "fx-sparkle").setDepth(7).setAlpha(0.9).setScale(0.8 + Math.random() * 0.5);
+        this.tweens.add({
+          targets: spark,
+          y: y - 10 - Math.random() * 6,
+          alpha: 0,
+          angle: Math.random() * 180,
+          duration: 900,
+          ease: "Sine.easeOut",
+          onComplete: () => spark.destroy(),
         });
       },
     });
