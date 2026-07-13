@@ -49,14 +49,6 @@ button {
   cursor: pointer;
 }
 
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-[tabindex]:focus-visible {
-  outline: 3px solid var(--grp-focus);
-  outline-offset: 2px;
-}
-
 /* Reduced motion: respect both OS preference and in-game toggle */
 .grp-reduced-motion * {
   animation-duration: 0.001ms !important;
@@ -117,16 +109,23 @@ input:focus-visible,
 
 /* The D-pad moves real DOM focus between buttons (see useGbcScope), so a
    strong, game-like focus ring is the only visual cue the player has for
-   "this is what A will activate" — it must never be subtle. */
-button:focus-visible,
-a:focus-visible,
-[tabindex]:focus-visible {
+   "this is what A will activate" — it must never be subtle. Uses plain
+   :focus rather than :focus-visible: the latter is gated by a per-browser
+   heuristic that doesn't reliably show a ring for focus() calls made from
+   inside a touch/click handler (exactly how every on-screen D-pad press
+   works here), which left the ring invisible on at least some mobile
+   browsers even though real DOM focus had genuinely moved. Every focusable
+   element here is a deliberate game control, so showing the ring on any
+   focus (however it was reached) is the correct, expected behavior. */
+button:focus,
+a:focus,
+[tabindex]:focus {
   outline: 3px solid #ffd54f;
   outline-offset: 2px;
   box-shadow: 0 0 0 3px rgba(255, 213, 79, 0.35);
 }
 
-.grp-btn:focus-visible {
+.grp-btn:focus {
   transform: translateY(-2px);
 }
 

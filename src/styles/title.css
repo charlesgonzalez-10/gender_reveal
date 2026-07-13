@@ -133,7 +133,7 @@
   transition: transform 0.06s ease, filter 0.06s ease;
 }
 
-.grp-letter-key:focus-visible,
+.grp-letter-key:focus,
 .grp-letter-key:active {
   outline: 2px solid #ffd54f;
   transform: scale(0.92);
