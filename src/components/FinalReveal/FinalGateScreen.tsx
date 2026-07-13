@@ -30,10 +30,10 @@ export default function FinalGateScreen({ onBegin, onCancel }: FinalGateScreenPr
         </p>
         <p className="grp-final-gate-warning">Gather everyone around before continuing.</p>
         <div className="grp-minigame-actions">
-          <button type="button" className="grp-btn grp-btn--primary" onClick={onBegin} data-gbc-default>
+          <button type="button" className="grp-btn grp-btn--primary" onClick={onBegin}>
             Enter the Temple
           </button>
-          <button type="button" className="grp-btn" onClick={onCancel}>
+          <button type="button" className="grp-btn" onClick={onCancel} data-gbc-default>
             Not Yet
           </button>
         </div>
