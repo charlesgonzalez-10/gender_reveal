@@ -4,8 +4,8 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: clamp(4px, 2vw, 14px);
-  padding: 0.6rem clamp(6px, 3vw, 18px) max(0.9rem, env(safe-area-inset-bottom));
+  gap: clamp(2px, 1.2vw, 10px);
+  padding: 0.6rem clamp(2px, 1.5vw, 12px) max(0.9rem, env(safe-area-inset-bottom));
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
@@ -31,8 +31,8 @@
 .grp-dpad-cross {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, clamp(56px, 15vw, 72px));
-  grid-template-rows: repeat(3, clamp(56px, 15vw, 72px));
+  grid-template-columns: repeat(3, clamp(56px, 14vw, 70px));
+  grid-template-rows: repeat(3, clamp(56px, 14vw, 70px));
   flex: 0 0 auto;
 }
 
@@ -90,7 +90,7 @@
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
-  gap: clamp(6px, 2vw, 14px);
+  gap: clamp(4px, 1.2vw, 10px);
   align-self: flex-end;
   margin-bottom: clamp(14px, 4vw, 20px);
 }
@@ -104,7 +104,7 @@
 
 .grp-pill-btn {
   position: relative;
-  width: clamp(48px, 13vw, 58px);
+  width: clamp(36px, 9vw, 52px);
   height: 44px;
   padding: 0;
   border: none;
@@ -140,13 +140,15 @@
 
 /* Diagonal A / B cluster, matching the classic handheld layout: B low and
    to the left, A high and to the right. Buttons meet the >=64px minimum
-   comfortable touch target with generous spacing so the two can't be
-   pressed by the same accidental thumb slip. */
+   comfortable touch target. Separation between the two comes mostly from
+   height rather than width — width is the scarce dimension in this row
+   layout, but the deck has vertical room to spare, so the cluster grows
+   tall rather than wide to keep A and B from overlapping. */
 .grp-action-cluster {
   position: relative;
   flex: 0 0 auto;
-  width: clamp(96px, 24vw, 118px);
-  height: clamp(92px, 23vw, 112px);
+  width: clamp(72px, 18vw, 90px);
+  height: clamp(130px, 34vw, 150px);
 }
 
 .grp-action-btn {
