@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useGbcScope } from "../game/systems/useGbcScope";
 import "../styles/pauseMenu.css";
 
 interface PauseMenuProps {
@@ -23,13 +24,19 @@ export default function PauseMenu({
   onFullscreen,
 }: PauseMenuProps) {
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // B backs out of the reset confirmation first if it's open, otherwise
+  // resumes play — mirrors the "cancel/back" and "resume" roles for B/Start
+  // from the control spec.
+  useGbcScope(rootRef, { onBack: () => (confirmingReset ? setConfirmingReset(false) : onResume()) });
 
   return (
-    <div className="grp-pause-overlay" role="dialog" aria-label="Pause menu">
-      <div className="grp-pause-panel grp-pixel-panel">
+    <div className="grp-pause-overlay" role="dialog" aria-label="Pause menu" data-gbc-scope="pause">
+      <div className="grp-pause-panel grp-pixel-panel" ref={rootRef}>
         <h2>Paused</h2>
         <div className="grp-pause-actions">
-          <button type="button" className="grp-btn grp-btn--primary" onClick={onResume}>
+          <button type="button" className="grp-btn grp-btn--primary" onClick={onResume} data-gbc-default>
             Resume
           </button>
           <button type="button" className="grp-btn" onClick={onToggleSound} aria-pressed={soundEnabled}>

@@ -99,7 +99,7 @@ export default function TimingBarGame({ onComplete, onExit, reducedMotion = fals
           <p>Press the action button (Space / Enter / E, or the HIT button) when it's inside the glowing zone.</p>
           <p>Land {REQUIRED_HITS} successful hits to win!</p>
           <div className="grp-minigame-actions">
-            <button type="button" className="grp-btn grp-btn--primary" onClick={startGame}>
+            <button type="button" className="grp-btn grp-btn--primary" onClick={startGame} data-gbc-default>
               Start
             </button>
           </div>
@@ -124,7 +124,7 @@ export default function TimingBarGame({ onComplete, onExit, reducedMotion = fals
             </p>
           )}
           <div className="grp-minigame-actions">
-            <button type="button" className="grp-btn grp-btn--primary" onClick={attemptHit}>
+            <button type="button" className="grp-btn grp-btn--primary" onClick={attemptHit} data-gbc-default>
               HIT!
             </button>
             <button type="button" className="grp-btn" onClick={startGame}>
@@ -140,7 +140,7 @@ export default function TimingBarGame({ onComplete, onExit, reducedMotion = fals
       {phase === "won" && (
         <div className="grp-minigame-success">
           <p>Charmander gives you the Flame Clue!</p>
-          <button type="button" className="grp-btn grp-btn--primary" onClick={onComplete}>
+          <button type="button" className="grp-btn grp-btn--primary" onClick={onComplete} data-gbc-default>
             Continue
           </button>
         </div>

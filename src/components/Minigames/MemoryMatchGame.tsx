@@ -87,7 +87,7 @@ export default function MemoryMatchGame({ onComplete, onExit, reducedMotion = fa
           <p>Flip the cards and find all three matching pairs of nature symbols.</p>
           <p>Tap two cards at a time. Matching symbols stay face up!</p>
           <div className="grp-minigame-actions">
-            <button type="button" className="grp-btn grp-btn--primary" onClick={retry}>
+            <button type="button" className="grp-btn grp-btn--primary" onClick={retry} data-gbc-default>
               Start
             </button>
           </div>
@@ -108,6 +108,7 @@ export default function MemoryMatchGame({ onComplete, onExit, reducedMotion = fa
                   onClick={() => flipCard(index)}
                   aria-label={isFaceUp ? `Card showing ${card.symbol}` : "Face-down card"}
                   disabled={matched.has(index)}
+                  data-gbc-default={index === 0 ? true : undefined}
                 >
                   {isFaceUp ? <GameSymbol type={card.symbol} size={28} /> : <span aria-hidden="true">?</span>}
                 </button>
@@ -128,7 +129,7 @@ export default function MemoryMatchGame({ onComplete, onExit, reducedMotion = fa
       {phase === "won" && (
         <div className="grp-minigame-success">
           <p>Bulbasaur trusts you with the Leaf Clue!</p>
-          <button type="button" className="grp-btn grp-btn--primary" onClick={onComplete}>
+          <button type="button" className="grp-btn grp-btn--primary" onClick={onComplete} data-gbc-default>
             Continue
           </button>
         </div>

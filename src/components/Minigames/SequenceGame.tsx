@@ -91,7 +91,7 @@ export default function SequenceGame({ onComplete, onExit, reducedMotion = false
           <p>Watch the sequence of water symbols light up, then repeat it in the same order.</p>
           <p>Complete 3 short rounds to win.</p>
           <div className="grp-minigame-actions">
-            <button type="button" className="grp-btn grp-btn--primary" onClick={startGame}>
+            <button type="button" className="grp-btn grp-btn--primary" onClick={startGame} data-gbc-default>
               Start
             </button>
           </div>
@@ -111,13 +111,14 @@ export default function SequenceGame({ onComplete, onExit, reducedMotion = false
             ))}
           </div>
           <div className="grp-sequence-row" role="group" aria-label="Choose the symbol">
-            {SYMBOLS.map((sym) => (
+            {SYMBOLS.map((sym, i) => (
               <button
                 key={sym}
                 type="button"
                 className="grp-sequence-btn"
                 onClick={() => pressSymbol(sym)}
                 disabled={phase !== "input"}
+                data-gbc-default={i === 0 ? true : undefined}
               >
                 <GameSymbol type={sym} size={26} />
               </button>
@@ -127,7 +128,7 @@ export default function SequenceGame({ onComplete, onExit, reducedMotion = false
             <>
               <p role="alert">Not quite! Let's try that round again.</p>
               <div className="grp-minigame-actions">
-                <button type="button" className="grp-btn grp-btn--primary" onClick={() => startRound(round)}>
+                <button type="button" className="grp-btn grp-btn--primary" onClick={() => startRound(round)} data-gbc-default>
                   Retry Round
                 </button>
               </div>
@@ -144,7 +145,7 @@ export default function SequenceGame({ onComplete, onExit, reducedMotion = false
       {phase === "roundWon" && (
         <div className="grp-minigame-success">
           <p>Splash! Round {round + 1} complete!</p>
-          <button type="button" className="grp-btn grp-btn--primary" onClick={nextRound}>
+          <button type="button" className="grp-btn grp-btn--primary" onClick={nextRound} data-gbc-default>
             Next Round
           </button>
         </div>
@@ -153,7 +154,7 @@ export default function SequenceGame({ onComplete, onExit, reducedMotion = false
       {phase === "won" && (
         <div className="grp-minigame-success">
           <p>Squirtle gives you the Water Clue!</p>
-          <button type="button" className="grp-btn grp-btn--primary" onClick={onComplete}>
+          <button type="button" className="grp-btn grp-btn--primary" onClick={onComplete} data-gbc-default>
             Continue
           </button>
         </div>

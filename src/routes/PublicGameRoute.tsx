@@ -15,6 +15,7 @@ import DialogueBox from "../components/DialogueBox";
 import ClueTracker from "../components/ClueTracker";
 import MobileControls from "../components/MobileControls";
 import PauseMenu from "../components/PauseMenu";
+import QuickAccessOverlay from "../components/QuickAccessOverlay";
 import FinalGateScreen from "../components/FinalReveal/FinalGateScreen";
 import FinalRevealSequence from "../components/FinalReveal/FinalRevealSequence";
 import MemoryMatchGame from "../components/Minigames/MemoryMatchGame";
@@ -31,6 +32,9 @@ const COMPLETION_LINES: Record<PokemonId, string> = {
   squirtle: "Squirtle gives you the Water Clue!",
   pikachu: "Pikachu gives you the Lightning Clue!",
 };
+
+const IDLE_HINT_MS = 20_000;
+const IDLE_HINT = "Try walking with the D-pad to explore — the Professor's lab is a good place to start!";
 
 export default function PublicGameRoute() {
   const {
@@ -53,9 +57,23 @@ export default function PublicGameRoute() {
   const [finalRevealActive, setFinalRevealActive] = useState(false);
   const [finalRevealWord, setFinalRevealWord] = useState<RevealWord | null>(null);
   const [paused, setPaused] = useState(false);
+  const [quickAccessOpen, setQuickAccessOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [gameMountKey, setGameMountKey] = useState(0);
   const phaserGameRef = useRef<Phaser.Game | null>(null);
+
+  // Any of these being true means a menu/overlay owns input right now, so
+  // the top-level GBC handlers below should defer to that overlay's own
+  // useGbcScope instead of falling back to map movement/interaction.
+  const anyOverlayOpen = Boolean(
+    activeDialogue || activeMinigame || gateScreenOpen || finalRevealActive || paused || quickAccessOpen,
+  );
+  const overlayOpenRef = useRef(anyOverlayOpen);
+  overlayOpenRef.current = anyOverlayOpen;
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+  const screenRef = useRef(screen);
+  screenRef.current = screen;
 
   function showNotice(msg: string) {
     setNotice(msg);
@@ -110,7 +128,7 @@ export default function PublicGameRoute() {
       setActiveDialogue(payload);
     }
     function onFinalUnlocked() {
-      showNotice("The glowing gate by the rocky cave has opened!");
+      showNotice("The ground trembles — the Ancient Temple has awoken!");
     }
     function onEnterGate() {
       setGateScreenOpen(true);
@@ -141,6 +159,34 @@ export default function PublicGameRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen]);
 
+  // Gently nudges players who haven't taken any action for a while — the
+  // adventure should never leave anyone feeling lost or stuck.
+  useEffect(() => {
+    if (screen !== "game") return;
+    let timeoutId: number;
+    function scheduleHint() {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        if (screenRef.current === "game" && !overlayOpenRef.current) {
+          showNotice(IDLE_HINT);
+        }
+        scheduleHint();
+      }, IDLE_HINT_MS);
+    }
+    function onActivity() {
+      scheduleHint();
+    }
+    gameEvents.on(GameEvent.Footstep, onActivity);
+    gameEvents.on(GameEvent.Interact, onActivity);
+    scheduleHint();
+    return () => {
+      window.clearTimeout(timeoutId);
+      gameEvents.off(GameEvent.Footstep, onActivity);
+      gameEvents.off(GameEvent.Interact, onActivity);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (screen !== "game") return;
@@ -161,6 +207,49 @@ export default function PublicGameRoute() {
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, progress.soundEnabled]);
+
+  // Top-level GBC handling: A/B fall back to map interaction only when no
+  // overlay's own useGbcScope is already consuming the press. Start opens
+  // or resumes the pause menu; Select opens the quick-access clue tracker.
+  // Both are permanent, screen-wide listeners (unlike overlay scopes,
+  // which mount/unmount with their overlay).
+  useEffect(() => {
+    function onConfirm() {
+      if (screenRef.current !== "game" || overlayOpenRef.current) return;
+      gameEvents.emit(GameEvent.RemoteAction);
+    }
+    function onCancel() {
+      if (screenRef.current !== "game" || overlayOpenRef.current) return;
+      // Nothing to back out of on the bare map.
+    }
+    function onStart() {
+      if (screenRef.current !== "game") return;
+      if (pausedRef.current) {
+        handleClosePause();
+      } else if (!overlayOpenRef.current) {
+        handleOpenPause();
+      }
+    }
+    function onSelect() {
+      if (screenRef.current !== "game") return;
+      if (quickAccessOpen) {
+        setQuickAccessOpen(false);
+      } else if (!overlayOpenRef.current) {
+        setQuickAccessOpen(true);
+      }
+    }
+    gameEvents.on(GameEvent.GbcConfirm, onConfirm);
+    gameEvents.on(GameEvent.GbcCancel, onCancel);
+    gameEvents.on(GameEvent.GbcStart, onStart);
+    gameEvents.on(GameEvent.GbcSelect, onSelect);
+    return () => {
+      gameEvents.off(GameEvent.GbcConfirm, onConfirm);
+      gameEvents.off(GameEvent.GbcCancel, onCancel);
+      gameEvents.off(GameEvent.GbcStart, onStart);
+      gameEvents.off(GameEvent.GbcSelect, onSelect);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quickAccessOpen]);
 
   function toggleFullscreen() {
     try {
@@ -256,6 +345,7 @@ export default function PublicGameRoute() {
   }
 
   function handleOpenPause() {
+    if (overlayOpenRef.current) return;
     gameEvents.emit(GameEvent.LockMovement);
     setPaused(true);
   }
@@ -263,24 +353,6 @@ export default function PublicGameRoute() {
   function handleClosePause() {
     gameEvents.emit(GameEvent.UnlockMovement);
     setPaused(false);
-  }
-
-  function handleMobileAction() {
-    if (screen !== "game") return;
-    if (activeDialogue) {
-      handleDialogueClose();
-    } else {
-      gameEvents.emit(GameEvent.RemoteAction);
-    }
-  }
-
-  function handleMobileBack() {
-    if (screen !== "game") return;
-    if (paused) handleClosePause();
-    else if (activeMinigame) handleMinigameExit();
-    else if (activeDialogue) handleDialogueClose();
-    else if (gateScreenOpen) handleCancelGate();
-    else handleOpenPause();
   }
 
   if (revealStatus === "loading") {
@@ -368,11 +440,6 @@ export default function PublicGameRoute() {
 
                 <div className="grp-hud-layer">
                   <ClueTracker collectedClues={progress.collectedClues} />
-                  <div className="grp-top-bar">
-                    <button type="button" className="grp-icon-btn" onClick={handleOpenPause} aria-label="Open menu">
-                      ☰
-                    </button>
-                  </div>
                 </div>
 
                 {activeDialogue && (
@@ -436,6 +503,14 @@ export default function PublicGameRoute() {
                   />
                 )}
 
+                {quickAccessOpen && !finalRevealActive && (
+                  <QuickAccessOverlay
+                    collectedClues={progress.collectedClues}
+                    soundEnabled={progress.soundEnabled}
+                    onToggleSound={() => setSoundEnabled(!progress.soundEnabled)}
+                    onClose={() => setQuickAccessOpen(false)}
+                  />
+                )}
               </>
             )}
 
@@ -453,11 +528,10 @@ export default function PublicGameRoute() {
           </span>
         </div>
         <MobileControls
-          onAction={handleMobileAction}
-          onBack={handleMobileBack}
-          onMenu={handleOpenPause}
-          onMute={() => setSoundEnabled(!progress.soundEnabled)}
-          muted={!progress.soundEnabled}
+          onConfirm={() => gameEvents.emit(GameEvent.GbcConfirm)}
+          onCancel={() => gameEvents.emit(GameEvent.GbcCancel)}
+          onStart={() => gameEvents.emit(GameEvent.GbcStart)}
+          onSelect={() => gameEvents.emit(GameEvent.GbcSelect)}
         />
       </div>
     </div>

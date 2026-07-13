@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { RevealWord } from "../../providers/revealMapping";
 import { eventConfig } from "../../config/eventConfig";
 import { soundManager } from "../../state/audio";
+import { useGbcScope } from "../../game/systems/useGbcScope";
 import ClueIcon from "../ClueIcon";
 import PokemonIcon from "../PokemonIcon";
 import "../../styles/finalReveal.css";
@@ -87,20 +88,29 @@ export default function FinalRevealSequence({
   const isBoy = resultWord === "boy";
   const themeClass = isBoy ? "grp-reveal-theme-a" : "grp-reveal-theme-b";
   const headline = isBoy ? "IT'S A BOY!" : "IT'S A GIRL!";
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useGbcScope(rootRef, { onBack: onExitPreview, active: stage === "result" });
 
   return (
-    <div className={`grp-reveal-overlay ${stage === "result" ? themeClass : ""}`} role="dialog" aria-label="Final reveal">
+    <div
+      className={`grp-reveal-overlay ${stage === "result" ? themeClass : ""}`}
+      role="dialog"
+      aria-label="Final reveal"
+      ref={rootRef}
+      data-gbc-scope="final-reveal"
+    >
       {isPreview && <div className="grp-preview-banner">PREVIEW MODE — not the real result</div>}
 
       {stage === "clues" && (
         <>
-          <p className="grp-visually-hidden">All four clues combine into the mystery object.</p>
+          <p className="grp-visually-hidden">All four clues combine into a glowing egg upon the ancient pedestal.</p>
           <div className="grp-reveal-clue-row">
             {CLUE_ORDER.map((c) => (
               <ClueIcon key={c} id={c} size={40} collected />
             ))}
           </div>
-          <p>The clues are combining...</p>
+          <p>Bulbasaur, Charmander, Squirtle, and Pikachu gather around the pedestal...</p>
         </>
       )}
 
@@ -108,7 +118,8 @@ export default function FinalRevealSequence({
 
       {stage === "shaking" && (
         <div className="grp-reveal-orb-wrap">
-          <div className={`grp-reveal-orb ${reducedMotion ? "" : "grp-shake"}`} aria-label="Mystery object" />
+          <div className={`grp-reveal-orb ${reducedMotion ? "" : "grp-shake"}`} aria-label="The glowing egg" />
+          <p>The egg is glowing brighter...</p>
         </div>
       )}
 
@@ -132,6 +143,12 @@ export default function FinalRevealSequence({
           <div className="grp-reveal-result">
             <h1 className="grp-reveal-headline">{headline}</h1>
             <p className="grp-reveal-subtitle">{eventConfig.revealSubtitle}</p>
+            {!isPreview &&
+              eventConfig.revealClosingLines.map((line) => (
+                <p className="grp-reveal-closing-line" key={line}>
+                  {line}
+                </p>
+              ))}
             <div className="grp-reveal-pokemon-row">
               {POKEMON_ORDER.map((p) => (
                 <PokemonIcon key={p} id={p} size={48} animated />
@@ -149,7 +166,7 @@ export default function FinalRevealSequence({
                 Replay Reveal
               </button>
               {isPreview ? (
-                <button type="button" className="grp-btn grp-btn--primary" onClick={onExitPreview}>
+                <button type="button" className="grp-btn grp-btn--primary" onClick={onExitPreview} data-gbc-default>
                   Return to Setup
                 </button>
               ) : (
@@ -157,7 +174,7 @@ export default function FinalRevealSequence({
                   <button type="button" className="grp-btn" onClick={onReplayAdventure}>
                     Replay Adventure
                   </button>
-                  <button type="button" className="grp-btn grp-btn--primary" onClick={onReturnToTitle}>
+                  <button type="button" className="grp-btn grp-btn--primary" onClick={onReturnToTitle} data-gbc-default>
                     Return to Title
                   </button>
                 </>

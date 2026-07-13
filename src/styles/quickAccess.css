@@ -1,0 +1,55 @@
+.grp-quick-access-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 5, 10, 0.85);
+  padding: 1rem;
+}
+
+.grp-quick-access-panel {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: center;
+  font-size: 0.62rem;
+  width: min(300px, 100%);
+}
+
+.grp-quick-access-panel h2 {
+  font-size: 0.72rem;
+  margin: 0;
+}
+
+.grp-quick-access-clue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.grp-quick-access-clue-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35em 0.5em;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  text-align: left;
+}
+
+.grp-quick-access-clue-row span:first-of-type {
+  flex: 1;
+}
+
+.grp-quick-access-clue-row span:last-child {
+  color: #7ee787;
+  font-weight: bold;
+}

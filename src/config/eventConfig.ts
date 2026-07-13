@@ -12,6 +12,7 @@ export const eventConfig = {
   babyName: "",
   defaultPlayerName: "Trainer",
   revealSubtitle: "A new little trainer is joining the adventure!",
+  revealClosingLines: ["Congratulations Charles, Tiffany, and Giovanni.", "Your next great adventure begins now."],
   requireRevealBeforeStarting: true,
   enableAdminPin: true,
   enableMobileControls: true,

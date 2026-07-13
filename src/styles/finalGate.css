@@ -34,3 +34,9 @@
 .grp-final-gate-warning {
   color: #ffd54f;
 }
+
+.grp-final-gate-quote {
+  font-style: italic;
+  opacity: 0.85;
+  font-size: 0.58rem;
+}
