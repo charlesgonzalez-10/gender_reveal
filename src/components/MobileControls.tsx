@@ -78,33 +78,42 @@ export default function MobileControls({ onConfirm, onCancel, onStart, onSelect,
     };
   }
 
+  // A/B/Start/Select act on whatever menu item currently has DOM focus
+  // (see useGbcScope's activateFocused) — but browsers move focus to
+  // whatever <button> was just pressed by default, which would steal
+  // focus away from that menu item before the action even runs.
+  // Preventing default on pointerdown keeps focus right where it was.
+  function keepFocus(e: React.PointerEvent) {
+    e.preventDefault();
+  }
+
   return (
     <div className="grp-console-deck" aria-label="Console controls">
       <div className="grp-dpad-cross" role="group" aria-label="Directional pad">
         <button type="button" className="grp-dpad-btn grp-dpad-up" aria-label="Up" {...dpadHandlers("up")}>
-          <span className="grp-dpad-hit" aria-hidden="true" />▲
+          ▲
         </button>
         <button type="button" className="grp-dpad-btn grp-dpad-left" aria-label="Left" {...dpadHandlers("left")}>
-          <span className="grp-dpad-hit" aria-hidden="true" />◀
+          ◀
         </button>
         <span className="grp-dpad-hub" aria-hidden="true" />
         <button type="button" className="grp-dpad-btn grp-dpad-right" aria-label="Right" {...dpadHandlers("right")}>
-          <span className="grp-dpad-hit" aria-hidden="true" />▶
+          ▶
         </button>
         <button type="button" className="grp-dpad-btn grp-dpad-down" aria-label="Down" {...dpadHandlers("down")}>
-          <span className="grp-dpad-hit" aria-hidden="true" />▼
+          ▼
         </button>
       </div>
 
       <div className="grp-center-buttons" role="group" aria-label="System buttons">
         <span className="grp-pill-column">
-          <button type="button" className="grp-pill-btn" onClick={withFeedback(onSelect)} aria-label="Select" />
+          <button type="button" className="grp-pill-btn" onPointerDown={keepFocus} onClick={withFeedback(onSelect)} aria-label="Select" />
           <span className="grp-pill-label" aria-hidden="true">
             SELECT
           </span>
         </span>
         <span className="grp-pill-column">
-          <button type="button" className="grp-pill-btn" onClick={withFeedback(onStart)} aria-label="Start" />
+          <button type="button" className="grp-pill-btn" onPointerDown={keepFocus} onClick={withFeedback(onStart)} aria-label="Start" />
           <span className="grp-pill-label" aria-hidden="true">
             START
           </span>
@@ -112,12 +121,19 @@ export default function MobileControls({ onConfirm, onCancel, onStart, onSelect,
       </div>
 
       <div className="grp-action-cluster" role="group" aria-label="Action buttons">
-        <button type="button" className="grp-action-btn grp-action-b" onClick={withFeedback(onCancel)} aria-label="B — back / cancel">
+        <button
+          type="button"
+          className="grp-action-btn grp-action-b"
+          onPointerDown={keepFocus}
+          onClick={withFeedback(onCancel)}
+          aria-label="B — back / cancel"
+        >
           B
         </button>
         <button
           type="button"
           className="grp-action-btn grp-action-a"
+          onPointerDown={keepFocus}
           onClick={withFeedback(onConfirm)}
           aria-label="A — confirm / interact"
         >

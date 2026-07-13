@@ -38,12 +38,16 @@ export default function TitleScreen({
   // The whole screen is one D-pad + A/B navigable scope: every button
   // below is plain, focusable markup, so up/down/left/right movement and
   // A-to-confirm come for free from the shared GBC nav system. Only B's
-  // "go back" target changes depending on which page is showing.
+  // "go back" target changes depending on which page is showing. Start
+  // defaults to "confirm whatever's focused" (menu/settings), but on the
+  // letter-picker page it should always submit the name outright rather
+  // than just pressing whichever letter key happens to be focused.
   useGbcScope(rootRef, {
     onBack: () => {
       if (view === "menu") return;
       setView("menu");
     },
+    onStart: view === "name-entry" ? confirmName : undefined,
   });
 
   function confirmName() {
@@ -118,12 +122,13 @@ export default function TitleScreen({
           <div className="grp-letter-grid" role="group" aria-label="Letter picker">
             {LETTER_ROWS.map((row) => (
               <div className="grp-letter-row" key={row}>
-                {row.split("").map((letter) => (
+                {row.split("").map((letter, i) => (
                   <button
                     key={letter}
                     type="button"
                     className="grp-letter-key"
                     onClick={() => setName((n) => (n.length < NAME_MAX_LENGTH ? n + letter : n))}
+                    data-gbc-default={row === LETTER_ROWS[0] && i === 0 ? true : undefined}
                   >
                     {letter}
                   </button>
@@ -140,7 +145,7 @@ export default function TitleScreen({
             </div>
           </div>
           <div className="grp-title-buttons">
-            <button type="button" className="grp-btn grp-btn--primary" onClick={confirmName} data-gbc-default>
+            <button type="button" className="grp-btn grp-btn--primary" onClick={confirmName}>
               Let's Go!
             </button>
             <button type="button" className="grp-btn" onClick={() => setView("menu")}>
