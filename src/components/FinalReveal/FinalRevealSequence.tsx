@@ -7,7 +7,7 @@ import ClueIcon from "../ClueIcon";
 import PokemonIcon from "../PokemonIcon";
 import "../../styles/finalReveal.css";
 
-type Stage = "clues" | "countdown" | "shaking" | "flash" | "result";
+type Stage = "clues" | "countdown" | "paths" | "shaking" | "flash" | "result";
 
 interface FinalRevealSequenceProps {
   resultWord: RevealWord;
@@ -50,13 +50,19 @@ export default function FinalRevealSequence({
   useEffect(() => {
     if (stage !== "countdown") return;
     if (count <= 0) {
-      setStage("shaking");
+      setStage("paths");
       return;
     }
     soundManager.playSfx("countdown");
     const t = setTimeout(() => setCount((c) => c - 1), 850 * speed);
     return () => clearTimeout(t);
   }, [stage, count, speed]);
+
+  useEffect(() => {
+    if (stage !== "paths") return;
+    const t = setTimeout(() => setStage("shaking"), 1600 * speed);
+    return () => clearTimeout(t);
+  }, [stage, speed]);
 
   useEffect(() => {
     if (stage !== "shaking") return;
@@ -115,6 +121,21 @@ export default function FinalRevealSequence({
       )}
 
       {stage === "countdown" && <div className="grp-reveal-countdown" aria-live="assertive">{count > 0 ? count : "..."}</div>}
+
+      {stage === "paths" && (
+        <div className="grp-reveal-paths-wrap">
+          <p className="grp-visually-hidden">Two ancient paths stood sealed. One barrier has now disappeared.</p>
+          <div className="grp-reveal-paths" aria-hidden="true">
+            <div
+              className={`grp-reveal-path ${isBoy ? "grp-path-chosen grp-path-a" : "grp-path-sealed"} ${reducedMotion ? "grp-no-shimmer" : ""}`}
+            />
+            <div
+              className={`grp-reveal-path ${!isBoy ? "grp-path-chosen grp-path-b" : "grp-path-sealed"} ${reducedMotion ? "grp-no-shimmer" : ""}`}
+            />
+          </div>
+          <p className={`grp-reveal-paths-caption ${reducedMotion ? "grp-no-shimmer" : ""}`}>One path has been chosen...</p>
+        </div>
+      )}
 
       {stage === "shaking" && (
         <div className="grp-reveal-orb-wrap">
