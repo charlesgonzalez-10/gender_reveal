@@ -90,6 +90,9 @@ export default function MemoryMatchGame({ onComplete, onExit, reducedMotion = fa
             <button type="button" className="grp-btn grp-btn--primary" onClick={retry} data-gbc-default>
               Start
             </button>
+            <button type="button" className="grp-btn" onClick={onComplete}>
+              Skip Challenge
+            </button>
           </div>
         </div>
       )}

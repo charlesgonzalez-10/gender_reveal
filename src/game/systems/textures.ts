@@ -455,6 +455,62 @@ export function generatePokemonTexture(scene: Phaser.Scene, id: PokemonId): void
   g.destroy();
 }
 
+/** Small decorative effect sprites used purely for ambience (butterflies,
+ * drifting leaves, campfire glow, chimney smoke) — none of these affect
+ * gameplay, so they're kept intentionally tiny and simple. */
+export function generateAmbientTextures(scene: Phaser.Scene): void {
+  const butterflyColors: [string, number][] = [
+    ["fx-butterfly-a", 0xff9fd0],
+    ["fx-butterfly-b", 0xffe08a],
+  ];
+  for (const [key, color] of butterflyColors) {
+    if (scene.textures.exists(key)) continue;
+    const g = scene.add.graphics();
+    g.fillStyle(color, 0.9);
+    g.fillEllipse(2, 4, 3, 4);
+    g.fillEllipse(6, 4, 3, 4);
+    g.fillStyle(0x2c2c3a, 0.8);
+    g.fillRect(3.5, 2, 1, 6);
+    g.generateTexture(key, 8, 8);
+    g.destroy();
+  }
+
+  if (!scene.textures.exists("fx-leaf")) {
+    const g = scene.add.graphics();
+    g.fillStyle(0x6fbf7a, 0.85);
+    g.fillEllipse(3, 3, 4, 3);
+    g.generateTexture("fx-leaf", 6, 6);
+    g.destroy();
+  }
+
+  if (!scene.textures.exists("fx-smoke")) {
+    const g = scene.add.graphics();
+    g.fillStyle(0xd8d8e0, 0.55);
+    g.fillCircle(4, 4, 4);
+    g.generateTexture("fx-smoke", 8, 8);
+    g.destroy();
+  }
+
+  if (!scene.textures.exists("fx-glow")) {
+    const g = scene.add.graphics();
+    g.fillStyle(0xffb84d, 0.9);
+    g.fillCircle(5, 5, 3);
+    g.fillStyle(0xffe08a, 0.9);
+    g.fillCircle(5, 4, 1.6);
+    g.generateTexture("fx-glow", 10, 10);
+    g.destroy();
+  }
+
+  if (!scene.textures.exists("fx-sparkle")) {
+    const g = scene.add.graphics();
+    g.fillStyle(0xffffff, 0.85);
+    g.fillRect(2, 0, 1, 5);
+    g.fillRect(0, 2, 5, 1);
+    g.generateTexture("fx-sparkle", 5, 5);
+    g.destroy();
+  }
+}
+
 export function generateAllTextures(scene: Phaser.Scene): void {
   generateTileTextures(scene);
   generatePlayerTextures(scene);
@@ -462,4 +518,5 @@ export function generateAllTextures(scene: Phaser.Scene): void {
   generateNpcTexture(scene, "npc-townsfolk", 0xd77b4a);
   generateNpcTexture(scene, "npc-gardener", 0x6ab04c);
   (["bulbasaur", "charmander", "squirtle", "pikachu"] as PokemonId[]).forEach((id) => generatePokemonTexture(scene, id));
+  generateAmbientTextures(scene);
 }

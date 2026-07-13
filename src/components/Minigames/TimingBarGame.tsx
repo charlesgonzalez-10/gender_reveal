@@ -102,6 +102,9 @@ export default function TimingBarGame({ onComplete, onExit, reducedMotion = fals
             <button type="button" className="grp-btn grp-btn--primary" onClick={startGame} data-gbc-default>
               Start
             </button>
+            <button type="button" className="grp-btn" onClick={onComplete}>
+              Skip Challenge
+            </button>
           </div>
         </div>
       )}
@@ -120,7 +123,7 @@ export default function TimingBarGame({ onComplete, onExit, reducedMotion = fals
           </div>
           {feedback && (
             <p role="status" aria-live="assertive">
-              {feedback === "hit" ? "Nice hit!" : "Missed — try again!"}
+              {feedback === "hit" ? "Nice hit!" : "So close — try again!"}
             </p>
           )}
           <div className="grp-minigame-actions">

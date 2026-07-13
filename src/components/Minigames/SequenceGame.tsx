@@ -94,6 +94,9 @@ export default function SequenceGame({ onComplete, onExit, reducedMotion = false
             <button type="button" className="grp-btn grp-btn--primary" onClick={startGame} data-gbc-default>
               Start
             </button>
+            <button type="button" className="grp-btn" onClick={onComplete}>
+              Skip Challenge
+            </button>
           </div>
         </div>
       )}
@@ -126,7 +129,7 @@ export default function SequenceGame({ onComplete, onExit, reducedMotion = false
           </div>
           {phase === "miss" && (
             <>
-              <p role="alert">Not quite! Let's try that round again.</p>
+              <p role="alert">So close! Let's try that round again.</p>
               <div className="grp-minigame-actions">
                 <button type="button" className="grp-btn grp-btn--primary" onClick={() => startRound(round)} data-gbc-default>
                   Retry Round

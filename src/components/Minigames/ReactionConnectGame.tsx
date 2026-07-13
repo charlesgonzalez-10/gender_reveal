@@ -29,7 +29,7 @@ export default function ReactionConnectGame({ onComplete, onExit, reducedMotion 
     timeoutRef.current = window.setTimeout(
       () => {
         setLitNode(null);
-        setMessage("Too slow — watch for the next spark!");
+        setMessage("So close — watch for the next spark!");
         window.setTimeout(() => {
           setMessage(null);
           lightRandomNode();
@@ -80,8 +80,11 @@ export default function ReactionConnectGame({ onComplete, onExit, reducedMotion 
           <p>Watch the nodes — one will spark with electricity at a time.</p>
           <p>Tap the glowing node quickly before the spark fades. Connect {REQUIRED_HITS} sparks to win!</p>
           <div className="grp-minigame-actions">
-            <button type="button" className="grp-btn grp-btn--primary" onClick={startGame}>
+            <button type="button" className="grp-btn grp-btn--primary" onClick={startGame} data-gbc-default>
               Start
+            </button>
+            <button type="button" className="grp-btn" onClick={onComplete}>
+              Skip Challenge
             </button>
           </div>
         </div>
