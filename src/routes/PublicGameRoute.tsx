@@ -65,9 +65,9 @@ export default function PublicGameRoute() {
   useEffect(() => {
     let cancelled = false;
     revealProvider
-      .hasRevealBeenSet()
-      .then((isSet) => {
-        if (!cancelled) setRevealStatus(isSet ? "ready" : "not-set");
+      .getStatus()
+      .then((result) => {
+        if (!cancelled) setRevealStatus(result.locked ? "ready" : "not-set");
       })
       .catch(() => {
         if (!cancelled) setRevealStatus("error");
@@ -217,7 +217,7 @@ export default function PublicGameRoute() {
     setGateScreenOpen(false);
     soundManager.stopMusic();
     try {
-      const sealed = await revealProvider.getReveal();
+      const sealed = await revealProvider.getRevealValue();
       if (!sealed) {
         showNotice("The reveal result could not be found. Please contact the event organizer.");
         gameEvents.emit(GameEvent.UnlockMovement);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { isAdminSessionVerified, markAdminSessionVerified } from "../providers/adminAuth";
+import { isAdminSessionVerified } from "../providers/adminAuth";
 import PinGate from "../components/Setup/PinGate";
 import SetupDashboard from "../components/Setup/SetupDashboard";
 import "../styles/setup.css";
@@ -17,10 +17,7 @@ export default function SetupRoute() {
         ) : (
           <PinGate
             description="This screen controls the private gender reveal result. Only the trusted person handling the reveal should continue."
-            onVerified={() => {
-              markAdminSessionVerified();
-              setVerified(true);
-            }}
+            onVerified={() => setVerified(true)}
           />
         )}
       </div>

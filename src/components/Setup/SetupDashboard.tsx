@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { revealProvider } from "../../providers";
 import { sealedTokenFor, type RevealWord } from "../../providers/revealMapping";
-import { checkAdminPin } from "../../providers/adminAuth";
+import { getAdminToken, verifyAdminPin } from "../../providers/adminAuth";
 import FinalRevealSequence from "../FinalReveal/FinalRevealSequence";
 
 type LockStatus = "loading" | "unlocked" | "locked" | "error";
@@ -12,20 +12,22 @@ export default function SetupDashboard() {
   const [status, setStatus] = useState<LockStatus>("loading");
   const [selection, setSelection] = useState<RevealWord | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [secondaryAction, setSecondaryAction] = useState<SecondaryAction>(null);
   const [secondaryPin, setSecondaryPin] = useState("");
   const [secondaryError, setSecondaryError] = useState<string | null>(null);
+  const [secondaryBusy, setSecondaryBusy] = useState(false);
   const [previewWord, setPreviewWord] = useState<RevealWord | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const refreshStatus = useCallback(async () => {
     try {
-      const isSet = await revealProvider.hasRevealBeenSet();
-      setStatus(isSet ? "locked" : "unlocked");
+      const result = await revealProvider.getStatus();
+      setStatus(result.locked ? "locked" : "unlocked");
     } catch {
       setStatus("error");
-      setErrorMessage("Unable to read the stored reveal. Browser storage may be unavailable.");
+      setErrorMessage("Unable to reach the shared reveal storage. Check your connection and try again.");
     }
   }, []);
 
@@ -37,6 +39,7 @@ export default function SetupDashboard() {
     setSelection(word);
     setConfirming(true);
     setSuccessMessage(null);
+    setErrorMessage(null);
   }
 
   function cancelSelection() {
@@ -45,15 +48,25 @@ export default function SetupDashboard() {
   }
 
   async function lockReveal() {
-    if (!selection) return;
-    try {
-      await revealProvider.saveReveal(sealedTokenFor(selection));
+    if (!selection || saving) return;
+    const token = getAdminToken();
+    if (!token) {
+      setErrorMessage("Your admin session has expired. Please reload and re-enter the PIN.");
+      return;
+    }
+    setSaving(true);
+    setErrorMessage(null);
+    const result = await revealProvider.setReveal(sealedTokenFor(selection), token);
+    setSaving(false);
+    if (result.ok) {
       setConfirming(false);
       setSelection(null);
       setSuccessMessage("The reveal has been securely set. The adventure is ready!");
       await refreshStatus();
-    } catch {
-      setErrorMessage("Something went wrong while saving. Please try again.");
+    } else {
+      setErrorMessage(result.error || "Something went wrong while saving. Please try again.");
+      // The reveal may have just been locked by another device — reflect that.
+      await refreshStatus();
     }
   }
 
@@ -64,21 +77,31 @@ export default function SetupDashboard() {
   }
 
   async function confirmSecondary() {
-    if (!checkAdminPin(secondaryPin)) {
-      setSecondaryError("Incorrect PIN.");
+    if (secondaryBusy) return;
+    setSecondaryBusy(true);
+    setSecondaryError(null);
+    const verified = await verifyAdminPin(secondaryPin);
+    if (!verified.ok) {
+      setSecondaryBusy(false);
+      setSecondaryError(verified.error || "Incorrect PIN.");
       return;
     }
-    if (secondaryAction === "reset") {
-      await revealProvider.resetReveal();
-      setSuccessMessage(null);
-      await refreshStatus();
-    } else if (secondaryAction === "change") {
-      // Allow re-selecting; underlying value stays until a new one is locked.
-      setStatus("unlocked");
-      setSuccessMessage(null);
+    const token = getAdminToken();
+    if (!token) {
+      setSecondaryBusy(false);
+      setSecondaryError("Could not verify your session. Please try again.");
+      return;
     }
+    const result = await revealProvider.resetReveal(token);
+    setSecondaryBusy(false);
+    if (!result.ok) {
+      setSecondaryError(result.error || "Unable to reset the reveal. Please try again.");
+      return;
+    }
+    setSuccessMessage(null);
     setSecondaryAction(null);
     setSecondaryPin("");
+    await refreshStatus();
   }
 
   if (previewWord) {
@@ -118,6 +141,12 @@ export default function SetupDashboard() {
         </p>
       )}
 
+      {errorMessage && status !== "error" && (
+        <p role="alert" className="grp-setup-error">
+          {errorMessage}
+        </p>
+      )}
+
       {status === "unlocked" && !confirming && (
         <div className="grp-setup-selection">
           <p className="grp-setup-copy">Select the result to lock in. This should only be done by a trusted person.</p>
@@ -137,12 +166,15 @@ export default function SetupDashboard() {
           <p>
             You selected <strong>{selection.toUpperCase()}</strong>. Are you sure you want to lock this reveal?
           </p>
-          <p className="grp-setup-hint">Once locked, the game will not show this value anywhere until the final reveal sequence.</p>
+          <p className="grp-setup-hint">
+            Once locked, every device will share this exact result — it will not show anywhere until the final reveal
+            sequence, and it cannot be changed without the admin PIN.
+          </p>
           <div className="grp-setup-actions">
-            <button type="button" className="grp-btn grp-btn--primary" onClick={lockReveal}>
-              Lock Reveal
+            <button type="button" className="grp-btn grp-btn--primary" onClick={lockReveal} disabled={saving}>
+              {saving ? "Locking…" : "Lock Reveal"}
             </button>
-            <button type="button" className="grp-btn" onClick={cancelSelection}>
+            <button type="button" className="grp-btn" onClick={cancelSelection} disabled={saving}>
               Cancel
             </button>
           </div>
@@ -162,7 +194,10 @@ export default function SetupDashboard() {
 
       {secondaryAction && (
         <div className="grp-setup-confirm" role="alertdialog" aria-label="Re-enter admin PIN">
-          <p>Re-enter the admin PIN to {secondaryAction === "reset" ? "reset" : "change"} the reveal.</p>
+          <p>
+            Re-enter the admin PIN to {secondaryAction === "reset" ? "reset" : "change"} the reveal.
+            {secondaryAction === "change" && " This will clear the locked result so you can pick again."}
+          </p>
           <input
             type="password"
             className="grp-setup-input"
@@ -170,6 +205,7 @@ export default function SetupDashboard() {
             onChange={(e) => setSecondaryPin(e.target.value)}
             autoFocus
             aria-label="Admin PIN"
+            disabled={secondaryBusy}
           />
           {secondaryError && (
             <p role="alert" className="grp-setup-error">
@@ -177,10 +213,10 @@ export default function SetupDashboard() {
             </p>
           )}
           <div className="grp-setup-actions">
-            <button type="button" className="grp-btn grp-btn--primary" onClick={confirmSecondary}>
-              Confirm
+            <button type="button" className="grp-btn grp-btn--primary" onClick={confirmSecondary} disabled={secondaryBusy}>
+              {secondaryBusy ? "Checking…" : "Confirm"}
             </button>
-            <button type="button" className="grp-btn" onClick={() => setSecondaryAction(null)}>
+            <button type="button" className="grp-btn" onClick={() => setSecondaryAction(null)} disabled={secondaryBusy}>
               Cancel
             </button>
           </div>

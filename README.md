@@ -21,13 +21,13 @@ see [Copyright & assets](#copyright--assets) below.
 - [Using /setup — how a trusted person enters the result](#using-setup--how-a-trusted-person-enters-the-result)
 - [Resetting the reveal](#resetting-the-reveal)
 - [Testing both endings safely (preview mode)](#testing-both-endings-safely-preview-mode)
-- [How local storage works & its limitations](#how-local-storage-works--its-limitations)
+- [How the shared reveal works & local progress storage](#how-the-shared-reveal-works--local-progress-storage)
 - [Preventing spoilers](#preventing-spoilers)
 - [Customizing names, titles, and messages](#customizing-names-titles-and-messages)
 - [Replacing placeholder graphics](#replacing-placeholder-graphics)
 - [Replacing placeholder audio](#replacing-placeholder-audio)
-- [Deploying to Vercel or Netlify](#deploying-to-vercel-or-netlify)
-- [Adding a server-backed reveal provider later](#adding-a-server-backed-reveal-provider-later)
+- [Deploying to Vercel](#deploying-to-vercel)
+- [How the reveal API is structured](#how-the-reveal-api-is-structured)
 - [Project structure](#project-structure)
 - [Testing the full game before the event](#testing-the-full-game-before-the-event)
 - [Event-day checklist](#event-day-checklist)
@@ -81,7 +81,9 @@ Requires Node.js 20+.
 ```bash
 npm install
 cp .env.example .env.local
-# edit .env.local and set a real VITE_ADMIN_PIN
+# edit .env.local and set a real ADMIN_PIN (and, for the shared reveal API,
+# connect a Redis/Upstash integration — see "Setting the admin PIN" and
+# "How the shared reveal works" below)
 npm run dev
 ```
 
@@ -102,30 +104,34 @@ npm run test:watch  # watch mode
 ```
 
 The test suite focuses on the areas that matter most to get right for a
-live event: the reveal provider (save/get/reset and that only neutral
-tokens are ever stored), admin PIN checking, progress persistence, clue/
-challenge tracking, and the full `/setup` flow (PIN gate → selection →
-confirmation → lock → reset-requires-PIN → preview mode never touching the
-real stored value).
+live event: the reveal provider (set/get/reset against a fake of the
+serverless API, including the "already locked" 409 case), admin PIN
+checking against the server, progress persistence, clue/challenge
+tracking, and the full `/setup` flow (PIN gate → selection → confirmation
+→ lock → reset-requires-PIN → preview mode never touching the real stored
+value).
 
 ## Setting the admin PIN
 
-The `/setup` screen is protected by a PIN read from the `VITE_ADMIN_PIN`
-environment variable at build time.
+The `/setup` screen is protected by a PIN checked **only on the server**,
+inside the `api/reveal/*` serverless functions, via the `ADMIN_PIN`
+environment variable. It is never bundled into client JavaScript — do not
+prefix it with `VITE_`, and do not set `VITE_ADMIN_PIN` anywhere.
 
-1. Copy `.env.example` to `.env.local`.
-2. Set `VITE_ADMIN_PIN` to a PIN only your trusted organizer(s) know. **Do
-   not use `1234` or the placeholder `change-this-pin`** — the app will
-   show a warning on the setup screen if you forget to change it.
-3. Rebuild/redeploy so the new value is bundled in.
+1. Copy `.env.example` to `.env.local` for local development.
+2. Set `ADMIN_PIN` to a PIN only your trusted organizer(s) know, in your
+   hosting provider's environment variable settings (e.g. Vercel Project
+   Settings → Environment Variables). **Do not use `1234` or the
+   placeholder `change-this-pin`** — the setup screen shows a warning if
+   you forget to change it.
+3. Optionally set `ADMIN_TOKEN_SECRET` to a separate long random value used
+   to sign short-lived admin session tokens (defaults to `ADMIN_PIN` if
+   unset).
+4. Redeploy so the new value takes effect.
 
-**Important security limitation:** this PIN is checked entirely in the
-browser and is bundled into the built JavaScript. Anyone who inspects the
-built JS files can recover it. This is intentionally simple for a first
-version aimed at a private family event — it's meant to keep casual guests
-from stumbling into `/setup`, not to withstand a determined attacker. See
-[Adding a server-backed reveal provider later](#adding-a-server-backed-reveal-provider-later)
-for how to move PIN verification server-side.
+The server verifies the PIN with a constant-time comparison and rate-limits
+repeated incorrect attempts (5 per 60 seconds per client, with a temporary
+lockout) so it can't be brute-forced from the browser.
 
 ## Using /setup — how a trusted person enters the result
 
@@ -158,7 +164,7 @@ From `/setup`, once locked, two admin-PIN-protected actions are available:
 
 Resetting a player's normal game progress (from the in-game pause menu) is
 a *separate* action and never touches the sealed reveal — see
-[How local storage works](#how-local-storage-works--its-limitations).
+[How the shared reveal works](#how-the-shared-reveal-works--local-progress-storage).
 
 ## Testing both endings safely (preview mode)
 
@@ -175,37 +181,42 @@ Use preview mode to check the visuals/animations look right on your event
 device — never trigger the real final reveal as a test (see the
 [event-day checklist](#event-day-checklist)).
 
-## How local storage works & its limitations
+## How the shared reveal works & local progress storage
 
-Two independent things are stored in the browser's `localStorage`, under
-separate keys, so that resetting one never affects the other:
+The locked reveal result is **shared server-side** so every device — every
+phone, every browser, in or out of private browsing — sees the exact same
+outcome. It is stored in a small Redis (KV) database behind the
+`api/reveal/*` serverless functions, not in any per-device browser storage:
 
-- `grp_sealed_v1` — the sealed reveal result, as one of two **neutral**
-  tokens: `"optionA"` or `"optionB"`. The words "boy" and "girl" are never
-  written to storage. The single place in the code that maps a token back
-  to a human-facing word is `src/providers/revealMapping.ts`, and it's only
-  consulted at the moment the final reveal sequence actually renders (or
-  during an explicit preview).
-- `grp_progress_v1` — ordinary game progress (trainer name, collected
-  clues, completed challenges, last player position, sound/motion
-  preferences). Resetting this from the in-game pause menu never touches
-  `grp_sealed_v1`.
+- The sealed value is written as one of two **neutral** tokens,
+  `"optionA"` or `"optionB"` — the words "boy" and "girl" are never sent to
+  or stored in the database. The single place in the code that maps a
+  token back to a human-facing word is `src/providers/revealMapping.ts`,
+  and it's only consulted at the moment the final reveal sequence actually
+  renders (or during an explicit preview).
+- Locking is atomic ("set if not already set"), so if two people
+  accidentally try to lock a result at the same time, the second request
+  is rejected with *"The reveal has already been locked."* — there's no
+  way for two devices to ever disagree about the official result.
+- The public `/api/reveal/status` endpoint only ever returns
+  `{ configured, locked }` — never the actual value. The value is only
+  fetched, once, at the moment a player actually triggers the final reveal
+  sequence.
 
-**This is not a secure secret store.** `localStorage` is plain text and
-visible to anyone with devtools access to that browser profile. Even
-though the stored token is neutral (`optionA`/`optionB`), a technically
-knowledgeable person who also reads the open-source code could look up
-`revealMapping.ts` and figure out what the token means. For a private
-family event this is a reasonable, low-effort tradeoff; if you need
-stronger guarantees, see the next section.
+Ordinary game progress (trainer name, collected clues, completed
+challenges, last player position, sound/motion preferences) is a
+*separate* concern and still lives in this device's own `localStorage`
+under `grp_progress_v1` — that's expected and fine to be per-device, since
+each player's walk through the game is their own. Resetting progress from
+the in-game pause menu never touches the shared reveal.
 
 ## Preventing spoilers
 
 Before the final reveal sequence actually plays, the result is designed to
 never appear in: the URL, dialogue, menus, clue descriptions, the browser
-console, error messages, `localStorage` (as the words "boy"/"girl"), asset
-or audio filenames, CSS class names, revealing variable names, network
-request names, or public config files. All internal names use neutral
+console, error messages, browser storage or the shared database (as the
+words "boy"/"girl"), asset or audio filenames, CSS class names, revealing
+variable names, network request names, or public config files. All internal names use neutral
 terms (`sealedReveal`, `optionA`/`optionB`, `revealProvider`,
 `SealedRevealResult`). Reveal visuals (color treatment, headline) are
 generated dynamically from the fetched token at the moment the final
@@ -311,11 +322,11 @@ To use real audio:
    `soundManager.playSfx(name)` / `soundManager.playMusic(track)` call
    signatures so no other file needs to change.
 
-## Deploying to Vercel or Netlify
+## Deploying to Vercel
 
-This is a static single-page app (no backend required).
-
-**Vercel**
+This is a Vite SPA plus a handful of Vercel serverless functions under
+`api/reveal/*` that back the shared reveal store — it needs the API routes
+and a Redis database, not just static hosting.
 
 1. Import the repo in Vercel.
 2. Framework preset: Vite. Build command `npm run build`, output directory
@@ -324,45 +335,44 @@ This is a static single-page app (no backend required).
    this from the repository's default branch at import time, so if `main`
    isn't the GitHub default branch, production deploys won't track pushes
    to `main` until you set this explicitly.
-4. Add an environment variable `VITE_ADMIN_PIN` in the Vercel project
-   settings (not just `.env.local`, which isn't deployed).
-5. Add a rewrite so client-side routing works for `/setup`:
-   `vercel.json`:
+4. From the Vercel Marketplace, connect a **Redis** (Upstash) integration
+   to the project — this populates the `KV_REST_API_URL`/`KV_REST_API_TOKEN`
+   (or `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`) environment
+   variables automatically.
+5. Add an `ADMIN_PIN` environment variable in the Vercel project settings
+   (server-only — not `.env.local`, which isn't deployed, and never
+   `VITE_ADMIN_PIN`). Optionally add `ADMIN_TOKEN_SECRET` too.
+6. `vercel.json` already routes client-side navigation to `/index.html`
+   while leaving `/api/*` alone:
    ```json
-   { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
+   { "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }] }
    ```
-
-**Netlify**
-
-1. Build command `npm run build`, publish directory `dist`.
-2. Set `VITE_ADMIN_PIN` under Site settings → Environment variables.
-3. Add `public/_redirects` with: `/*  /index.html  200`.
 
 After every redeploy, re-verify `/setup` still requires your PIN and that
 the reveal state you expect is present (see the checklist below).
 
-## Adding a server-backed reveal provider later
+## How the reveal API is structured
 
-The whole app talks to the reveal store through one interface:
+The whole app talks to the shared reveal store through one interface
+(`src/types/reveal.ts`), implemented by `src/providers/ServerRevealProvider.ts`
+and wired up in `src/providers/index.ts`:
 
 ```ts
 export interface RevealProvider {
-  hasRevealBeenSet(): Promise<boolean>;
-  saveReveal(result: SealedRevealResult): Promise<void>;
-  getReveal(): Promise<SealedRevealResult | null>;
-  resetReveal(): Promise<void>;
+  getStatus(): Promise<RevealStatus>; // { configured, locked } — never the value
+  getRevealValue(): Promise<SealedRevealResult | null>;
+  verifyPin(pin: string): Promise<VerifyPinResult>;
+  setReveal(result: SealedRevealResult, adminToken: string): Promise<RevealActionResult>;
+  resetReveal(adminToken: string): Promise<RevealActionResult>;
 }
 ```
 
-`src/providers/LocalRevealProvider.ts` is the current `localStorage`-backed
-implementation, wired up in `src/providers/index.ts`. A documented,
-unwired example server-backed implementation is provided at
-`src/providers/ServerRevealProvider.example.ts`, with notes on wiring it up
-to **Supabase**, **Firebase**, **Vercel serverless functions**, or
-**Netlify functions**. In every case, verify the admin PIN (or a proper
-auth flow) *server-side* rather than trusting the client — that's the main
-security upgrade a server-backed provider buys you. To switch, implement
-the interface and change one line in `src/providers/index.ts`.
+It calls five serverless functions under `api/reveal/`: `status` and
+`value` are public GET endpoints (status never exposes the value; value is
+only fetched at the moment the final reveal actually triggers), while
+`verify-pin`, `set`, and `reset` are POST endpoints — `set`/`reset` require
+a short-lived signed token that `verify-pin` only issues after checking
+`ADMIN_PIN` on the server (see `api/_lib/adminAuth.ts` and `api/_lib/kv.ts`).
 
 ## Project structure
 
@@ -410,8 +420,9 @@ src/
 ## Event-day checklist
 
 1. Deploy the latest version.
-2. Set a strong admin PIN (`VITE_ADMIN_PIN`) in your hosting provider's
-   environment variables, not just locally.
+2. Set a strong admin PIN (`ADMIN_PIN`, server-only) in your hosting
+   provider's environment variables, not just locally, and confirm the
+   Redis/KV integration is connected.
 3. Open `/setup` on a private device.
 4. Have the trusted person enter the gender.
 5. Confirm the setup screen shows the reveal as **LOCKED**.
