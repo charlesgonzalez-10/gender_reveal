@@ -31,13 +31,21 @@ export function getFocusableElements(root: ParentNode): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(isVisible);
 }
 
+/** Focusing an off-screen element normally makes the browser auto-scroll
+ * its nearest scrollable ancestor to reveal it. That's desirable when the
+ * player deliberately D-pad-navigates to something below the fold, but not
+ * on initial mount: several confirmation screens default focus to a safety
+ * button (e.g. "Not Yet") positioned near the bottom of their panel, and
+ * without preventScroll the very first render would already be scrolled
+ * away from the panel's top, hiding its heading before the player has done
+ * anything. */
 export function focusDefault(root: ParentNode): void {
   const explicit = root.querySelector<HTMLElement>("[data-gbc-default]");
   if (explicit && isVisible(explicit)) {
-    explicit.focus();
+    explicit.focus({ preventScroll: true });
     return;
   }
-  getFocusableElements(root)[0]?.focus();
+  getFocusableElements(root)[0]?.focus({ preventScroll: true });
 }
 
 /**

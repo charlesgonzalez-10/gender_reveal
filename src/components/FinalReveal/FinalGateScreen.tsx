@@ -20,13 +20,11 @@ export default function FinalGateScreen({ onBegin, onCancel }: FinalGateScreenPr
         <h2>The Ancient Temple Awakens!</h2>
         <div className="grp-final-gate-clues">
           {CLUES.map((c) => (
-            <ClueIcon key={c} id={c} size={26} collected />
+            <ClueIcon key={c} id={c} size={20} collected />
           ))}
         </div>
-        <p>The ground trembles. With all four clues gathered, the great stone doors are opening.</p>
         <p className="grp-final-gate-quote">
-          "Long ago, two paths were created. Only one has been chosen today. No one knows which path destiny has
-          selected until the temple awakens."
+          "Two paths were created long ago. Only one has been chosen — no one knows which until the temple awakens."
         </p>
         <p className="grp-final-gate-warning">Gather everyone around before continuing.</p>
         <div className="grp-minigame-actions">
